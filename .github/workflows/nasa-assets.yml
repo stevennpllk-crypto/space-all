@@ -1,0 +1,43 @@
+name: Import NASA imagery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Tools/fetch_nasa_assets.py"
+      - ".github/workflows/nasa-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nasa-imagery-import
+  cancel-in-progress: false
+
+jobs:
+  download-and-commit:
+    name: Download official NASA image assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Fetch images from NASA Image and Video Library
+        run: python Tools/fetch_nasa_assets.py
+      - name: Commit downloaded NASA assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Assets/Art/NASA
+          if git diff --cached --quiet; then
+            echo "NASA assets are already up to date."
+          else
+            git commit -m "Add high-resolution NASA space imagery"
+            git push
+          fi
