@@ -16,6 +16,7 @@ required = [
     "Assets/Scripts/GalaxyExplorer/SpaceGameMenu.cs",
     "Assets/Scripts/GalaxyExplorer/GalaxyQualityManager.cs",
     "Assets/Scripts/GalaxyExplorer/PlanetTextureFactory.cs",
+    "Assets/Scripts/GalaxyExplorer/ProceduralSpaceAudio.cs",
     "Assets/Editor/GalaxyProjectSetup.cs",
     "Assets/Editor/GalaxySceneInstaller.cs",
     "Assets/Scripts/GalaxyExplorer/GalaxyWorldBootstrap.cs.meta",
