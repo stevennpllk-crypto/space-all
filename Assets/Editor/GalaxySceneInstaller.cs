@@ -28,6 +28,9 @@ public static class GalaxySceneInstaller
         if (!File.Exists(ScenePath))
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Additive);
+            GameObject defaultLight = GameObject.Find("Directional Light");
+            if (defaultLight != null) Object.DestroyImmediate(defaultLight);
+
             var bootstrap = new GameObject("Galaxy Explorer Bootstrap");
             bootstrap.AddComponent<GalaxyWorldBootstrap>();
             EditorSceneManager.SaveScene(scene, ScenePath);
