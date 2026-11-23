@@ -12,7 +12,7 @@ Source-first Unity foundation for an Android space-flight prototype. This is not
 3. Wait for scripts to compile.
 4. Select Galaxy Explorer > Build Prototype 0.1 Scene.
 5. The editor tool generates Assets/Scenes/MainScene.unity and adds it to Build Settings.
-6. Press Play to test the scene in the Editor. Use landscape orientation.
+6. Run **Galaxy Explorer > Configure Android Player Settings** to apply the package identifier, landscape orientation, IL2CPP and ARM64 defaults.\n7. Run **Galaxy Explorer > Validate Prototype 0.1** for a scene-structure check.\n8. Press Play to test the scene in the Editor. Use landscape orientation.
 
 ## Android build
 1. Open File > Build Profiles and select Android; switch platform if prompted.
