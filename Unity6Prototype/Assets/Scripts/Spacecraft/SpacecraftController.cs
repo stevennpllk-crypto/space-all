@@ -20,6 +20,7 @@ namespace GalaxyExplorer.Spacecraft
         private bool braking;
 
         public float Speed => body == null ? 0f : body.linearVelocity.magnitude;
+        public float Throttle => throttle;
         public bool IsBraking => braking;
 
         public void SetMoveStick(VirtualJoystick value) => moveStick = value;
@@ -39,6 +40,9 @@ namespace GalaxyExplorer.Spacecraft
 
         private void FixedUpdate()
         {
+            if (body.isKinematic)
+                return;
+
             Vector2 movement = moveStick != null ? moveStick.Value : Vector2.zero;
             Vector2 looking = lookStick != null ? lookStick.Value : Vector2.zero;
 
