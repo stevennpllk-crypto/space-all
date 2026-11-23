@@ -10,7 +10,7 @@ namespace GalaxyExplorer.Spacecraft
     [RequireComponent(typeof(Rigidbody), typeof(SpacecraftController))]
     public sealed class LandingAssist : MonoBehaviour
     {
-        [SerializeField, Min(0f)] private float landingAltitude = 0.75f;
+        [SerializeField, Min(0f)] private float landingAltitude = 1.15f;
         [SerializeField, Min(0f)] private float maximumLandingSpeed = 2.5f;
         [SerializeField, Min(0f)] private float maximumRadialSpeed = 1.25f;
         [SerializeField, Range(1f, 45f)] private float maximumTilt = 25f;
@@ -21,6 +21,7 @@ namespace GalaxyExplorer.Spacecraft
         private GravitySource nearestBody;
         private float altitude = float.PositiveInfinity;
         private bool landed;
+        private GravitySource[] sources;
 
         public bool IsLanded => landed;
         public float Altitude => altitude;
@@ -32,6 +33,7 @@ namespace GalaxyExplorer.Spacecraft
         {
             body = GetComponent<Rigidbody>();
             ship = GetComponent<SpacecraftController>();
+            sources = FindObjectsByType<GravitySource>(FindObjectsSortMode.None);
         }
 
         private void FixedUpdate()
@@ -70,8 +72,6 @@ namespace GalaxyExplorer.Spacecraft
         {
             nearestBody = null;
             altitude = float.PositiveInfinity;
-            GravitySource[] sources = FindObjectsByType<GravitySource>(FindObjectsSortMode.None);
-
             foreach (GravitySource source in sources)
             {
                 if (source == null || source.SurfaceGravity <= 0f)
