@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Runtime HUD showing ship speed and discovered worlds.</summary>
+/// <summary>Runtime HUD showing ship speed, discoveries, and camera mode controls.</summary>
 public sealed class SpaceHUD : MonoBehaviour
 {
     private GUIStyle labelStyle;
@@ -9,7 +9,8 @@ public sealed class SpaceHUD : MonoBehaviour
     private void Awake()
     {
         var ship = GameObject.Find("Player Exploration Ship");
-        if (ship != null) ship.AddComponent<SpaceHUDMarker>();
+        if (ship != null && ship.GetComponent<SpaceHUDMarker>() == null)
+            ship.AddComponent<SpaceHUDMarker>();
     }
 
     private void OnGUI()
@@ -28,6 +29,15 @@ public sealed class SpaceHUD : MonoBehaviour
         float speed = shipBody != null ? shipBody.velocity.magnitude : 0f;
         GUI.Label(new Rect(32, 64, 270, 26), "SPEED  " + speed.ToString("0.0") + " m/s", labelStyle);
         GUI.Label(new Rect(32, 92, 270, 26), "WORLDS  " + DiscoveryLog.GetDiscoveredNames().Count, labelStyle);
+
+        SpacecraftFollowCamera cameraRig = FindObjectOfType<SpacecraftFollowCamera>();
+        if (cameraRig != null)
+        {
+            float buttonWidth = Application.isMobilePlatform ? 190f : 210f;
+            Rect viewButton = new Rect(Screen.width - buttonWidth - 20f, 18f, buttonWidth, 48f);
+            if (GUI.Button(viewButton, cameraRig.FirstPerson ? "VIEW: COCKPIT  |  SWITCH" : "VIEW: CHASE  |  SWITCH"))
+                cameraRig.ToggleView();
+        }
 
         if (Application.isMobilePlatform)
         {
