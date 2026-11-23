@@ -5,7 +5,7 @@ namespace GalaxyExplorer.Spacecraft {
  public sealed class SpacecraftController : MonoBehaviour {
   [SerializeField] private float thrust=18f, rotationSpeed=65f, maxSpeed=85f, brakeStrength=2.5f;
   [SerializeField] private VirtualJoystick moveStick, lookStick;
-  private Rigidbody body; private float throttle=.65f; private bool braking;
+  private Rigidbody body; private float throttle=0f; private bool braking;
   public float Speed=>body==null?0f:body.linearVelocity.magnitude;
   public void SetMoveStick(VirtualJoystick v)=>moveStick=v; public void SetLookStick(VirtualJoystick v)=>lookStick=v;
   public void SetThrottle(float v)=>throttle=Mathf.Clamp01(v); public void SetBraking(bool v)=>braking=v;
