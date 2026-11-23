@@ -2,7 +2,10 @@
 
 ## Source implemented
 - [x] Unity 6-oriented source layout
-- [x] Editor scene generator
+- [x] Editor scene generator with high-detail planet mesh generation
+- [x] Cinematic URP post-processing volume (Bloom, ACES, color grading, vignette)
+- [x] High-quality lighting, soft shadows, HDR/MSAA camera defaults and expanded starfield
+- [x] Android high-visual-quality player defaults (Linear, 4× MSAA setting, high shadows, anisotropic filtering, LOD bias)
 - [x] Sun, Earth, Moon and Mars placeholder bodies
 - [x] Explorer Rigidbody flight controller
 - [x] Configurable spherical gravity sources for Earth, Moon and Mars
@@ -17,7 +20,7 @@
 - [ ] Import into Unity 6 and resolve editor-version API differences
 - [ ] Generate scene in Unity Editor
 - [ ] Run Play Mode checks, including gravity falloff, landing thresholds and multi-touch input
-- [ ] Configure URP Android renderer and build profiles
+- [ ] Verify URP asset HDR/MSAA settings and profile GPU/memory cost on the target Android device
 - [ ] Build APK
 - [ ] Install and test on a physical Android device
 
