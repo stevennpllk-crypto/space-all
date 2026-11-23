@@ -8,12 +8,21 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 
 ## Current systems in source
 
-- Runtime procedural starfield and seven discoverable planets with generated surface maps.\n- A ringed gas giant and a custom primitive spacecraft model.\n- Original procedural engine hum and deep-space ambient audio.
+- Runtime procedural starfield and seven discoverable planets with 512×256 multi-layer surface maps.
+- Procedural tangent-space normal maps for additional lighting and surface relief.
+- A user-adjustable graphics slider from 50% (performance) to 150% (ultra), saved locally.
+- A ringed gas giant and a custom primitive spacecraft model.
+- Original procedural engine hum and deep-space ambient audio.
 - Planet rotation and orbital path visuals.
 - Rigidbody spacecraft movement with keyboard and touch input.
 - Smooth third-person chase camera.
 - Proximity-based planet discovery and local discovery journal.
-- Runtime HUD showing ship speed and discovery count.\n- Pause overlay and discovery journal.\n- Adaptive low/balanced/high graphics defaults based on device RAM and GPU memory.\n- Editor utility that creates a starter scene asset and registers it in Build Settings when Unity imports the project.\n- Editor command for Android landscape, ARM64, IL2CPP, Android API 26+, and dual input handling.\n- Initial EditMode tests for discovery persistence.
+- Runtime HUD showing ship speed and discovery count.
+- Pause overlay and discovery journal.
+- Adaptive low/balanced/high graphics defaults based on device RAM and GPU memory.
+- Editor utility that creates a starter scene asset and registers it in Build Settings when Unity imports the project.
+- Editor command for Android landscape, ARM64, IL2CPP, Android API 26+, and dual input handling.
+- Initial EditMode tests for discovery persistence.
 - Unity package manifest for URP, Input System, uGUI, and Test Framework.
 
 ## Target platform and quality
@@ -21,7 +30,8 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - Unity 6 (6000.0.32f1 baseline)
 - Android first; iOS is a later target.
 - Universal Render Pipeline.
-- Scalable quality settings: mobile performance must be profiled before enabling expensive effects.
+- Scalable quality settings: the in-game slider adjusts URP render scale, LOD, texture mip limits, shadows, and target frame rate.
+- 150% quality is a maximum setting, not a performance guarantee; use a lower value on memory-limited phones.
 - Touch-first controls, with keyboard support in the Editor.
 
 ## Controls (current prototype)
@@ -36,7 +46,13 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - [x] Procedural galaxy bootstrap and starter planets
 - [x] Spacecraft flight controller
 - [x] Chase camera
-- [x] Discovery journal and HUD\n- [x] Pause menu and journal overlay\n- [x] Adaptive mobile quality profile\n- [x] Procedural planet surface maps and ring geometry\n- [x] Starter scene installer and Android setup utility\n- [x] Initial EditMode tests\n- [x] Runtime and test assembly definitions
+- [x] Discovery journal and HUD
+- [x] Pause menu and journal overlay
+- [x] Adaptive mobile quality profile
+- [x] Procedural planet surface maps and ring geometry
+- [x] Starter scene installer and Android setup utility
+- [x] Initial EditMode tests
+- [x] Runtime and test assembly definitions
 - [x] Unity package manifest and ignore rules
 - [ ] Validate package versions in Unity Package Manager
 - [ ] Add authored planet textures, ship model, skybox, and audio assets
