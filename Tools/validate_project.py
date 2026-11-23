@@ -17,9 +17,12 @@ required = [
     "Assets/Scripts/GalaxyExplorer/GalaxyQualityManager.cs",
     "Assets/Scripts/GalaxyExplorer/PlanetTextureFactory.cs",
     "Assets/Editor/GalaxyProjectSetup.cs",
+    "Assets/Editor/GalaxySceneInstaller.cs",
+    "Assets/Scripts/GalaxyExplorer/GalaxyWorldBootstrap.cs.meta",
     "Assets/Tests/EditMode/GalaxyExplorer.Tests.asmdef",
     "Assets/Tests/EditMode/DiscoveryLogTests.cs",
     "Assets/Tests/EditMode/PlanetTextureFactoryTests.cs",
+    "Assets/Scenes/.gitkeep",
 ]
 
 missing = [path for path in required if not (ROOT / path).is_file()]
