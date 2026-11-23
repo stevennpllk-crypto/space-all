@@ -13,7 +13,7 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - Rigidbody spacecraft movement with keyboard and touch input.
 - Smooth third-person chase camera.
 - Proximity-based planet discovery and local discovery journal.
-- Runtime HUD showing ship speed and discovery count.
+- Runtime HUD showing ship speed and discovery count.\n- Pause overlay and discovery journal.\n- Adaptive low/balanced/high graphics defaults based on device RAM and GPU memory.\n- Initial EditMode tests for discovery persistence.
 - Unity package manifest for URP, Input System, uGUI, and Test Framework.
 
 ## Target platform and quality
@@ -36,7 +36,7 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - [x] Procedural galaxy bootstrap and starter planets
 - [x] Spacecraft flight controller
 - [x] Chase camera
-- [x] Discovery journal and HUD
+- [x] Discovery journal and HUD\n- [x] Pause menu and journal overlay\n- [x] Adaptive mobile quality profile\n- [x] Initial EditMode tests\n- [x] Runtime and test assembly definitions
 - [x] Unity package manifest and ignore rules
 - [ ] Validate package versions in Unity Package Manager
 - [ ] Add authored planet textures, ship model, skybox, and audio assets
