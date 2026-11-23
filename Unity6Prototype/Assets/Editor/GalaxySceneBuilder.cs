@@ -24,6 +24,7 @@ namespace GalaxyExplorer.Editor {
    var cameraGo=new GameObject("Main Camera");cameraGo.tag="MainCamera";var cam=cameraGo.AddComponent<Camera>();cam.fieldOfView=68;cam.nearClipPlane=.05f;cam.farClipPlane=2500;cameraGo.AddComponent<AudioListener>();
    var rig=cameraGo.AddComponent<CameraRigController>();rig.SetTarget(ship.transform);cameraGo.transform.position=ship.transform.position+new Vector3(0,3,-9);cameraGo.transform.LookAt(ship.transform);
    CanvasUI(ship,rig);
+   if(!AssetDatabase.IsValidFolder("Assets/Scenes")) AssetDatabase.CreateFolder("Assets","Scenes");
    EditorSceneManager.SaveScene(scene,"Assets/Scenes/MainScene.unity");
    EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/MainScene.unity",true)};
    Selection.activeGameObject=ship;Debug.Log("GALAXY EXPLORER Prototype 0.1 scene generated.");
