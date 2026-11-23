@@ -36,7 +36,9 @@ Source-first Unity foundation for an Android space-flight prototype. This is not
 - Landing: approach a gravity body slowly, with the craft's local up axis facing away from the surface; the assist holds a qualifying touchdown. Raise the throttle to release for takeoff.
 
 ## Known limitations
-- Procedural primitive geometry and flat colors are placeholders, not final NASA textures or production spacecraft art.
+- Planet bodies now use custom 96×64 UV sphere meshes with smooth normals, higher-detail atmosphere shells on Earth and Mars, and refined PBR material values. These are geometry and material upgrades, not NASA surface texture maps or final production assets.
+- The scene generator adds a global URP post-processing volume with Bloom, ACES tonemapping, color adjustments and subtle vignette; the main camera enables HDR and MSAA.
+- Android setup applies a high-quality baseline: Linear color space, 4× MSAA quality setting, very-high shadows, four cascades, anisotropic filtering and increased LOD bias. The active URP asset must also have HDR/MSAA enabled where supported; these settings need GPU profiling on the target phone.
 - Planet sizes and positions are gameplay-scaled, not astronomical distances.
 - Earth, Moon and Mars have configurable inverse-square gravity fields with finite influence radii. Gravity values are gameplay approximations; this is not an N-body orbital simulation.
 - A basic low-speed landing hold and throttle-based takeoff release are implemented in source; this is not a terrain-aware landing system and requires runtime tuning. Surface movement and astronaut mode are not implemented.
