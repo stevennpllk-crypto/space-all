@@ -216,6 +216,8 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
         if (FindObjectOfType<SpaceGameMenu>() == null)
             new GameObject("Galaxy Explorer Menu").AddComponent<SpaceGameMenu>();
+        if (FindObjectOfType<NASAImageGallery>() == null)
+            new GameObject("NASA Image Gallery").AddComponent<NASAImageGallery>();
     }
 
     private void BuildShipModel(Transform root)
