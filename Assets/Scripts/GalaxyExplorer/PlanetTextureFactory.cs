@@ -63,4 +63,39 @@ public static class PlanetTextureFactory
         texture.Apply(true, true);
         return texture;
     }
+
+    /// <summary>Creates a tangent-space normal map to add surface relief under lighting.</summary>
+    public static Texture2D CreateNormalMap(int seed)
+    {
+        const int width = 512;
+        const int height = 256;
+        const float strength = 5.5f;
+        var texture = new Texture2D(width, height, TextureFormat.RGB24, true, true);
+        texture.name = "Procedural Planet Normal " + seed;
+        texture.wrapMode = TextureWrapMode.Repeat;
+        texture.filterMode = FilterMode.Trilinear;
+        texture.anisoLevel = 8;
+
+        float ox = seed * 13.7f;
+        float oy = seed * 9.3f;
+        Color[] pixels = new Color[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            float v = (float)y / height;
+            for (int x = 0; x < width; x++)
+            {
+                float u = (float)x / width;
+                float left = Mathf.PerlinNoise((u - 1f / width) * 18f + ox, v * 18f + oy);
+                float right = Mathf.PerlinNoise((u + 1f / width) * 18f + ox, v * 18f + oy);
+                float down = Mathf.PerlinNoise(u * 18f + ox, (v - 1f / height) * 18f + oy);
+                float up = Mathf.PerlinNoise(u * 18f + ox, (v + 1f / height) * 18f + oy);
+                Vector3 normal = new Vector3(-(right - left) * strength, -(up - down) * strength, 1f).normalized;
+                pixels[y * width + x] = new Color(normal.x * 0.5f + 0.5f, normal.y * 0.5f + 0.5f, normal.z * 0.5f + 0.5f);
+            }
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply(true, true);
+        return texture;
+    }
 }
