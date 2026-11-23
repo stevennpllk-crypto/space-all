@@ -62,6 +62,10 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - [ ] Verify the generated starter scene in Unity Editor
 - [ ] Android profiling and build pipeline
 
+## Android APK build
+
+An automated Unity 6 Android APK workflow is available at `.github/workflows/android-apk.yml`. It requires a Unity Personal or Pro license file stored as the repository Actions secret `UNITY_LICENSE`. The first build attempt confirmed that this secret is not configured, so no APK was produced. See [BUILD_ANDROID.md](BUILD_ANDROID.md) for setup instructions. Never paste Unity credentials or license contents into chat or commit them to the repository.
+
 ## Important
 
 The runtime bootstrap creates a starter scene when Play starts, so the code can be tested in a new empty scene. This is not a substitute for a finished authored scene. Visual assets are currently procedural placeholders. The APK/build stage is intentionally deferred until the user says **جمع**.
