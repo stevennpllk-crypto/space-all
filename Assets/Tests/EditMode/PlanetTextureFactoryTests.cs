@@ -7,8 +7,8 @@ public sealed class PlanetTextureFactoryTests
     public void Create_ReturnsExpectedTextureDimensions()
     {
         Texture2D texture = PlanetTextureFactory.Create(Color.blue, 11, false);
-        Assert.AreEqual(256, texture.width);
-        Assert.AreEqual(128, texture.height);
+        Assert.AreEqual(512, texture.width);
+        Assert.AreEqual(256, texture.height);
         Object.DestroyImmediate(texture);
     }
 
