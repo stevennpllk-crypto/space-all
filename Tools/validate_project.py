@@ -15,6 +15,8 @@ required = [
     "Assets/Scripts/GalaxyExplorer/SpaceHUD.cs",
     "Assets/Scripts/GalaxyExplorer/SpaceGameMenu.cs",
     "Assets/Scripts/GalaxyExplorer/GalaxyQualityManager.cs",
+    "Assets/Scripts/GalaxyExplorer/PlanetTextureFactory.cs",
+    "Assets/Editor/GalaxyProjectSetup.cs",
     "Assets/Tests/EditMode/GalaxyExplorer.Tests.asmdef",
     "Assets/Tests/EditMode/DiscoveryLogTests.cs",
 ]
