@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public sealed class GalaxyWorldBootstrap : MonoBehaviour
 {
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void CreateWorld()
     {
         if (Object.FindObjectOfType<GalaxyWorldBootstrap>() != null) return;
@@ -144,16 +144,26 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         body.interpolation = RigidbodyInterpolation.Interpolate;
         ship.AddComponent<SpacecraftFlightController>();
 
-        var cameraObject = new GameObject("Exploration Camera");
-        cameraObject.transform.SetParent(transform, false);
-        var camera = cameraObject.AddComponent<Camera>();
-        camera.tag = "MainCamera";
+        Camera camera = Camera.main;
+        GameObject cameraObject;
+        if (camera == null)
+        {
+            cameraObject = new GameObject("Exploration Camera");
+            cameraObject.tag = "MainCamera";
+            camera = cameraObject.AddComponent<Camera>();
+            cameraObject.AddComponent<AudioListener>();
+        }
+        else cameraObject = camera.gameObject;
+
         camera.fieldOfView = 68f;
         camera.nearClipPlane = 0.08f;
         camera.farClipPlane = 1200f;
-        cameraObject.AddComponent<AudioListener>();
-        var follow = cameraObject.AddComponent<SpacecraftFollowCamera>();
+        var follow = cameraObject.GetComponent<SpacecraftFollowCamera>();
+        if (follow == null) follow = cameraObject.AddComponent<SpacecraftFollowCamera>();
         follow.target = ship.transform;
         follow.offset = new Vector3(0f, 5.5f, -13f);
+
+        if (FindObjectOfType<SpaceHUD>() == null)
+            new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
     }
 }
