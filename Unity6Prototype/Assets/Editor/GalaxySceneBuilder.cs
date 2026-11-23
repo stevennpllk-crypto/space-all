@@ -4,6 +4,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using GalaxyExplorer.Spacecraft;
 using GalaxyExplorer.Cameras;
 using GalaxyExplorer.Input;
@@ -19,11 +21,18 @@ namespace GalaxyExplorer.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             RenderSettings.ambientLight = new Color(.16f, .19f, .28f);
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.reflectionIntensity = .7f;
+            CreateCinematicVolume();
 
             var lightObject = new GameObject("Solar Directional Light");
             var light = lightObject.AddComponent<Light>();
             light.type = LightType.Directional;
-            light.intensity = 1.2f;
+            light.intensity = 1.35f;
+            light.shadows = LightShadows.Soft;
+            light.shadowStrength = .9f;
+            light.shadowBias = .035f;
+            light.shadowNormalBias = .4f;
             lightObject.transform.rotation = Quaternion.Euler(35, -35, 0);
 
             CreateBody("SUN", Vector3.zero, 8, new Color(1, .55f, .12f), true, .15f, 0f, 8f, 0f);
@@ -40,6 +49,8 @@ namespace GalaxyExplorer.Editor
             camera.fieldOfView = 68;
             camera.nearClipPlane = .05f;
             camera.farClipPlane = 2500;
+            camera.allowHDR = true;
+            camera.allowMSAA = true;
             cameraObject.AddComponent<AudioListener>();
 
             var cameraRig = cameraObject.AddComponent<CameraRigController>();
@@ -67,23 +78,131 @@ namespace GalaxyExplorer.Editor
             Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
             var material = new Material(shader);
             material.color = color;
+            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", emissive ? 0f : .12f);
+            if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", emissive ? .45f : .82f);
             if (emissive)
             {
                 material.EnableKeyword("_EMISSION");
-                material.SetColor("_EmissionColor", color * 2.4f);
+                material.SetColor("_EmissionColor", color * 3.2f);
             }
             return material;
         }
 
+        private static void CreateCinematicVolume()
+        {
+            var volumeObject = new GameObject("Global Cinematic Post Processing");
+            var volume = volumeObject.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.priority = 1f;
+            volume.profile = ScriptableObject.CreateInstance<VolumeProfile>();
+
+            Bloom bloom = volume.profile.Add<Bloom>(true);
+            bloom.threshold.Override(1.05f);
+            bloom.intensity.Override(.72f);
+            bloom.scatter.Override(.68f);
+
+            Tonemapping tone = volume.profile.Add<Tonemapping>(true);
+            tone.mode.Override(TonemappingMode.ACES);
+
+            ColorAdjustments color = volume.profile.Add<ColorAdjustments>(true);
+            color.postExposure.Override(.12f);
+            color.contrast.Override(12f);
+            color.saturation.Override(8f);
+
+            Vignette vignette = volume.profile.Add<Vignette>(true);
+            vignette.intensity.Override(.18f);
+            vignette.smoothness.Override(.72f);
+        }
+
+        private static Mesh CreateHighDetailSphere(int longitudeSegments = 96, int latitudeSegments = 64)
+        {
+            var mesh = new Mesh { name = "High Detail Planet Sphere" };
+            var vertices = new Vector3[(longitudeSegments + 1) * (latitudeSegments + 1)];
+            var normals = new Vector3[vertices.Length];
+            var uv = new Vector2[vertices.Length];
+            int index = 0;
+
+            for (int y = 0; y <= latitudeSegments; y++)
+            {
+                float v = (float)y / latitudeSegments;
+                float latitude = v * Mathf.PI;
+                for (int x = 0; x <= longitudeSegments; x++)
+                {
+                    float u = (float)x / longitudeSegments;
+                    float longitude = u * Mathf.PI * 2f;
+                    Vector3 normal = new Vector3(
+                        -Mathf.Cos(longitude) * Mathf.Sin(latitude),
+                        Mathf.Cos(latitude),
+                        Mathf.Sin(longitude) * Mathf.Sin(latitude));
+                    vertices[index] = normal;
+                    normals[index] = normal;
+                    uv[index] = new Vector2(u, v);
+                    index++;
+                }
+            }
+
+            int[] triangles = new int[longitudeSegments * latitudeSegments * 6];
+            int t = 0;
+            for (int y = 0; y < latitudeSegments; y++)
+            {
+                for (int x = 0; x < longitudeSegments; x++)
+                {
+                    int a = y * (longitudeSegments + 1) + x;
+                    int b = a + longitudeSegments + 1;
+                    triangles[t++] = a;
+                    triangles[t++] = b;
+                    triangles[t++] = a + 1;
+                    triangles[t++] = a + 1;
+                    triangles[t++] = b;
+                    triangles[t++] = b + 1;
+                }
+            }
+
+            mesh.vertices = vertices;
+            mesh.normals = normals;
+            mesh.uv = uv;
+            mesh.triangles = triangles;
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
+        private static void CreateAtmosphere(Transform parent, float radius, Color tint)
+        {
+            var atmosphere = new GameObject("Atmosphere Shell");
+            atmosphere.transform.SetParent(parent, false);
+            atmosphere.transform.localScale = Vector3.one * radius * 2.045f;
+            var filter = atmosphere.AddComponent<MeshFilter>();
+            filter.sharedMesh = CreateHighDetailSphere(64, 40);
+
+            Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) return;
+            var material = new Material(shader);
+            material.SetColor("_BaseColor", new Color(tint.r, tint.g, tint.b, .16f));
+            material.SetFloat("_Surface", 1f);
+            material.SetFloat("_Blend", 0f);
+            material.SetFloat("_ZWrite", 0f);
+            material.renderQueue = 3000;
+            atmosphere.AddComponent<MeshRenderer>().sharedMaterial = material;
+        }
+
         private static void CreateBody(string bodyName, Vector3 position, float radius, Color color, bool emissive, float spin, float gravity, float gravityRadius, float influenceRadius)
         {
-            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            body.name = bodyName;
+            var body = new GameObject(bodyName);
             body.transform.position = position;
-            body.transform.localScale = Vector3.one * radius * 2;
-            body.GetComponent<Renderer>().sharedMaterial = CreateMaterial(color, emissive);
+            body.transform.localScale = Vector3.one * radius * 2f;
+
+            Mesh mesh = CreateHighDetailSphere();
+            body.AddComponent<MeshFilter>().sharedMesh = mesh;
+            body.AddComponent<MeshRenderer>().sharedMaterial = CreateMaterial(color, emissive);
+            var collider = body.AddComponent<MeshCollider>();
+            collider.sharedMesh = mesh;
             body.AddComponent<CelestialBody>().Configure(bodyName, spin);
             body.AddComponent<GravitySource>().Configure(gravity, gravityRadius, influenceRadius);
+
+            if (bodyName == "EARTH")
+                CreateAtmosphere(body.transform, radius, new Color(.18f, .52f, 1f));
+            else if (bodyName == "MARS")
+                CreateAtmosphere(body.transform, radius, new Color(1f, .32f, .12f));
         }
 
         private static void CreateStars()
@@ -94,10 +213,10 @@ namespace GalaxyExplorer.Editor
             main.loop = false;
             main.playOnAwake = false;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
-            main.maxParticles = 650;
+            main.maxParticles = 2200;
             main.startLifetime = 100000f;
             main.startSpeed = 0f;
-            main.startSize = new ParticleSystem.MinMaxCurve(.35f, 1.1f);
+            main.startSize = new ParticleSystem.MinMaxCurve(.18f, .72f);
 
             var emission = particles.emission;
             emission.enabled = false;
@@ -108,7 +227,7 @@ namespace GalaxyExplorer.Editor
             renderer.sharedMaterial = new Material(shader);
 
             var random = new System.Random(2026);
-            var starParticles = new ParticleSystem.Particle[650];
+            var starParticles = new ParticleSystem.Particle[2200];
             for (int i = 0; i < starParticles.Length; i++)
             {
                 Vector3 direction = Random.onUnitSphere;
@@ -117,7 +236,7 @@ namespace GalaxyExplorer.Editor
                 {
                     position = direction * distance,
                     startColor = Color.white,
-                    startSize = Mathf.Lerp(.35f, 1.1f, (float)random.NextDouble()),
+                    startSize = Mathf.Lerp(.18f, .72f, (float)random.NextDouble()),
                     startLifetime = 100000f,
                     remainingLifetime = 100000f
                 };
