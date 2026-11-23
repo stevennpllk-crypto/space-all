@@ -101,7 +101,9 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             planet.transform.localPosition = new Vector3(Mathf.Cos(angle) * orbit, Random.Range(-5f, 5f), Mathf.Sin(angle) * orbit);
             float size = 3.5f + (i % 3) * 1.4f;
             planet.transform.localScale = Vector3.one * size;
-            planet.GetComponent<Renderer>().sharedMaterial = MakeMaterial(palette[i], 0.12f, 0.62f);
+            var surfaceMaterial = MakeMaterial(palette[i], 0.12f, 0.62f);
+            surfaceMaterial.mainTexture = PlanetTextureFactory.Create(palette[i], i + 1, i == 0 || i == 5);
+            planet.GetComponent<Renderer>().sharedMaterial = surfaceMaterial;
             planet.AddComponent<PlanetRotator>().degreesPerSecond = Random.Range(2f, 8f);
             var identity = planet.AddComponent<PlanetDiscovery>();
             identity.displayName = "World " + (i + 1);
