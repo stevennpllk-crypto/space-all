@@ -28,6 +28,14 @@ public sealed class SpaceHUD : MonoBehaviour
         float speed = shipBody != null ? shipBody.velocity.magnitude : 0f;
         GUI.Label(new Rect(32, 64, 270, 26), "SPEED  " + speed.ToString("0.0") + " m/s", labelStyle);
         GUI.Label(new Rect(32, 92, 270, 26), "WORLDS  " + DiscoveryLog.GetDiscoveredNames().Count, labelStyle);
+
+        if (Application.isMobilePlatform)
+        {
+            GUI.color = new Color(0.1f, 0.45f, 0.9f, 0.42f);
+            GUI.Box(new Rect(24, Screen.height - 168, 144, 144), "STEER");
+            GUI.Box(new Rect(Screen.width - 168, Screen.height - 168, 144, 144), "LOOK");
+            GUI.color = Color.white;
+        }
     }
 
     private static Rigidbody FindShipBody()
