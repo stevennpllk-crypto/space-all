@@ -1,0 +1,54 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "Assets/**"
+      - "Packages/**"
+      - "ProjectSettings/**"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    name: Unity 6 Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build APK with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          unityVersion: 6000.0.32f1
+          targetPlatform: Android
+          buildMethod: GalaxyAndroidBuild.Build
+          androidAppBundle: false
+          allowDirtyBuild: true
+
+      - name: Verify APK output
+        shell: bash
+        run: |
+          test -s Build/Android/GalaxyExplorer.apk
+          file Build/Android/GalaxyExplorer.apk
+          sha256sum Build/Android/GalaxyExplorer.apk
+
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Galaxy-Explorer-Android-APK
+          path: Build/Android/GalaxyExplorer.apk
+          if-no-files-found: error
+          retention-days: 14
