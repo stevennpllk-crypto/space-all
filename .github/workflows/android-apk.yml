@@ -35,7 +35,6 @@ jobs:
           unityVersion: 6000.0.32f1
           targetPlatform: Android
           buildMethod: GalaxyAndroidBuild.Build
-          androidAppBundle: false
           allowDirtyBuild: true
 
       - name: Verify APK output
