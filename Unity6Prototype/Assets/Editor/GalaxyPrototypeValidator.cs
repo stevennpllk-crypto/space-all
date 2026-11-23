@@ -3,8 +3,10 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 using GalaxyExplorer.Spacecraft;
 using GalaxyExplorer.Cameras;
+using GalaxyExplorer.UI;
 using GalaxyExplorer.World;
 
 namespace GalaxyExplorer.Editor
@@ -14,29 +16,48 @@ namespace GalaxyExplorer.Editor
         [MenuItem("Galaxy Explorer/Validate Prototype 0.1")]
         public static void Validate()
         {
-            const string path = "Assets/Scenes/MainScene.unity";
-            if (!AssetDatabase.LoadAssetAtPath<SceneAsset>(path))
+            const string scenePath = "Assets/Scenes/MainScene.unity";
+            if (!AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath))
             {
                 Debug.LogError("Validation failed: MainScene is missing. Run Build Prototype 0.1 Scene first.");
                 return;
             }
 
-            Scene scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
-            bool shipFound = false, cameraFound = false;
-            int bodies = 0;
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            bool shipFound = false;
+            bool cameraFound = false;
+            bool hudFound = false;
+            bool eventSystemFound = false;
+            bool shipHasRigidbody = false;
+            int celestialBodyCount = 0;
+
             foreach (GameObject root in scene.GetRootGameObjects())
             {
-                shipFound |= root.GetComponentInChildren<SpacecraftController>(true) != null;
+                SpacecraftController controller = root.GetComponentInChildren<SpacecraftController>(true);
+                if (controller != null)
+                {
+                    shipFound = true;
+                    shipHasRigidbody = controller.GetComponent<Rigidbody>() != null;
+                }
+
                 cameraFound |= root.GetComponentInChildren<CameraRigController>(true) != null;
-                bodies += root.GetComponentsInChildren<CelestialBody>(true).Length;
+                hudFound |= root.GetComponentInChildren<FlightHUD>(true) != null;
+                eventSystemFound |= root.GetComponentInChildren<EventSystem>(true) != null;
+                celestialBodyCount += root.GetComponentsInChildren<CelestialBody>(true).Length;
             }
+
             EditorSceneManager.CloseScene(scene, true);
 
-            bool pass = shipFound && cameraFound && bodies >= 4;
-            if (pass)
-                Debug.Log($"GALAXY EXPLORER validation passed: ship={shipFound}, camera={cameraFound}, celestial bodies={bodies}. This is an editor scene-structure check, not a runtime or APK test.");
+            bool passed = shipFound && shipHasRigidbody && cameraFound && hudFound &&
+                          eventSystemFound && celestialBodyCount >= 4;
+
+            string report = $"ship={shipFound}, rigidbody={shipHasRigidbody}, camera={cameraFound}, " +
+                            $"HUD={hudFound}, EventSystem={eventSystemFound}, celestial bodies={celestialBodyCount}";
+
+            if (passed)
+                Debug.Log($"GALAXY EXPLORER structure validation PASSED: {report}. This is not a runtime or APK test.");
             else
-                Debug.LogError($"GALAXY EXPLORER validation failed: ship={shipFound}, camera={cameraFound}, celestial bodies={bodies}. Rebuild the prototype scene.");
+                Debug.LogError($"GALAXY EXPLORER structure validation FAILED: {report}. Rebuild the prototype scene.");
         }
     }
 }
