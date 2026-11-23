@@ -82,7 +82,8 @@ namespace GalaxyExplorer.Editor
             body.transform.position = position;
             body.transform.localScale = Vector3.one * radius * 2;
             body.GetComponent<Renderer>().sharedMaterial = CreateMaterial(color, emissive);
-            body.AddComponent<CelestialBody>().Configure(bodyName, spin);\n            body.AddComponent<GravitySource>().Configure(gravity, gravityRadius, influenceRadius);
+            body.AddComponent<CelestialBody>().Configure(bodyName, spin);
+            body.AddComponent<GravitySource>().Configure(gravity, gravityRadius, influenceRadius);
         }
 
         private static void CreateStars()
