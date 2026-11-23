@@ -1,35 +1,51 @@
 # Galaxy Explorer
 
-A mobile-first 3D space exploration game built with Unity.
+A mobile-first 3D space exploration game built with Unity 6.
 
-## Current project status
-This repository was empty when development started. The initial commit adds a Unity C# starter scaffold; it is not yet a complete Unity project or an Android APK.
+## Project status
 
-## Target
-- Unity 6 (6000.0 LTS or newer compatible Unity 6 release)
-- Android
-- High-quality space visuals with scalable quality settings
-- Touch-friendly camera controls
-- Procedural planet placement
+This repository is in the **preparation phase**. Scripts, package configuration, and procedural world systems are being assembled. The project has **not** been built, packaged, or tested in the Unity Editor yet. No APK exists.
 
-## Setup
-1. Install Unity Hub and a Unity 6 Editor with Android Build Support (SDK, NDK, and OpenJDK).
-2. Create/open a 3D Core project.
-3. Copy the `Assets/` folder from this repository into the project.
-4. Create an empty GameObject named `GalaxyBootstrap` and attach `ProceduralGalaxy.cs`.
-5. Press Play to generate a sample star field and planets.
+## Current systems in source
 
-## Controls
-The starter camera controller supports one-finger drag rotation and pinch zoom when attached to the active camera. Desktop mouse drag and scroll are also supported in the Editor.
+- Runtime procedural starfield and seven discoverable planets.
+- Planet rotation and orbital path visuals.
+- Rigidbody spacecraft movement with keyboard and touch input.
+- Smooth third-person chase camera.
+- Proximity-based planet discovery and local discovery journal.
+- Runtime HUD showing ship speed and discovery count.
+- Unity package manifest for URP, Input System, uGUI, and Test Framework.
 
-## Roadmap
-- [x] Initial procedural scene-generation scripts
-- [x] Touch and mouse camera controller
-- [ ] Ship flight and navigation
-- [ ] Planet surface exploration
-- [ ] Save system and discovery log
-- [ ] Android performance profiling and device testing
-- [ ] Android build and release pipeline
+## Target platform and quality
+
+- Unity 6 (6000.0.32f1 baseline)
+- Android first; iOS is a later target.
+- Universal Render Pipeline.
+- Scalable quality settings: mobile performance must be profiled before enabling expensive effects.
+- Touch-first controls, with keyboard support in the Editor.
+
+## Controls (current prototype)
+
+- Desktop: WASD to accelerate/steer, mouse movement to rotate, Q/E to roll, Shift to boost, Ctrl to brake.
+- Mobile: hold and drag on the left side to steer; hold and drag on the right side to rotate.
+- Touch controls and the selected Unity Input handling mode still require Editor/device verification.
+
+## Preparation roadmap
+
+- [x] Initial Unity C# scaffold
+- [x] Procedural galaxy bootstrap and starter planets
+- [x] Spacecraft flight controller
+- [x] Chase camera
+- [x] Discovery journal and HUD
+- [x] Unity package manifest and ignore rules
+- [ ] Validate package versions in Unity Package Manager
+- [ ] Add authored planet textures, ship model, skybox, and audio assets
+- [ ] Add main menu, settings, map, and discovery screens
+- [ ] Add automated EditMode/PlayMode tests
+- [ ] Configure Android quality tiers and input settings
+- [ ] Create and validate the first Unity scene
+- [ ] Android profiling and build pipeline
 
 ## Important
-Ultra graphics are a target, not a verified performance setting. Quality must be profiled on the actual Android device and scaled dynamically to avoid overheating or frame drops.
+
+The runtime bootstrap creates a starter scene when Play starts, so the code can be tested in a new empty scene. This is not a substitute for a finished authored scene. Visual assets are currently procedural placeholders. The APK/build stage is intentionally deferred until the user says **جمع**.
