@@ -15,7 +15,7 @@ required = [
     "Assets/Scripts/GalaxyExplorer/SpaceHUD.cs",
     "Assets/Scripts/GalaxyExplorer/SpaceGameMenu.cs",
     "Assets/Scripts/GalaxyExplorer/GalaxyQualityManager.cs",
-    "Assets/Scripts/GalaxyExplorer/PlanetTextureFactory.cs",
+    "Assets/Scripts/GalaxyExplorer/PlanetTextureFactory.cs",\n    "Assets/Scripts/GalaxyExplorer/NASAImageGallery.cs",\n    "Assets/Editor/NASAResourceImporter.cs",\n    "Assets/Art/NASA/NASA_ASSET_CREDITS.json",\n    "Assets/Art/NASA/earth_gsfc_20171208_archive_e002131.jpg",\n    "Assets/Art/NASA/mars_pia24264.jpg",\n    "Assets/Art/NASA/jupiter_pia25020.jpg",\n    "Assets/Art/NASA/saturn_pia14858.jpg",\n    "Assets/Art/NASA/nebula_gsfc_20171208_archive_e000273.jpg",\n    "Assets/Art/NASA/galaxy_pia23123.jpg",\n    "Assets/Art/NASA/moon_pia15515.jpg",
     "Assets/Scripts/GalaxyExplorer/ProceduralSpaceAudio.cs",
     "Assets/Editor/GalaxyProjectSetup.cs",
     "Assets/Editor/GalaxySceneInstaller.cs",
@@ -44,3 +44,12 @@ if "m_EditorVersion: 6000." not in version:
 
 print("Source validation passed: required files and JSON configuration are present.")
 print("Note: this check does not compile Unity C# or create an APK.")
+
+with (ROOT / "Assets/Art/NASA/NASA_ASSET_CREDITS.json").open(encoding="utf-8") as handle:
+    nasa_manifest = json.load(handle)
+if len(nasa_manifest.get("assets", [])) < 7:
+    raise SystemExit("Expected at least seven NASA image records.")
+for asset in nasa_manifest["assets"]:
+    if not (ROOT / "Assets/Art/NASA" / asset["file"]).is_file():
+        raise SystemExit("Missing NASA image asset: " + asset["file"])
+
