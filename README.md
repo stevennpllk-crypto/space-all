@@ -8,7 +8,7 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 
 ## Current systems in source
 
-- Runtime procedural starfield and seven discoverable planets with generated surface maps.\n- A ringed gas giant and a custom primitive spacecraft model.
+- Runtime procedural starfield and seven discoverable planets with generated surface maps.\n- A ringed gas giant and a custom primitive spacecraft model.\n- Original procedural engine hum and deep-space ambient audio.
 - Planet rotation and orbital path visuals.
 - Rigidbody spacecraft movement with keyboard and touch input.
 - Smooth third-person chase camera.
