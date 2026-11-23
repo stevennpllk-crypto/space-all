@@ -29,7 +29,7 @@ namespace GalaxyExplorer.Editor
             bool hudFound = false;
             bool eventSystemFound = false;
             bool shipHasRigidbody = false;
-            int celestialBodyCount = 0;
+            int celestialBodyCount = 0;\n            int gravitySourceCount = 0;
 
             foreach (GameObject root in scene.GetRootGameObjects())
             {
@@ -43,16 +43,16 @@ namespace GalaxyExplorer.Editor
                 cameraFound |= root.GetComponentInChildren<CameraRigController>(true) != null;
                 hudFound |= root.GetComponentInChildren<FlightHUD>(true) != null;
                 eventSystemFound |= root.GetComponentInChildren<EventSystem>(true) != null;
-                celestialBodyCount += root.GetComponentsInChildren<CelestialBody>(true).Length;
+                celestialBodyCount += root.GetComponentsInChildren<CelestialBody>(true).Length;\n                gravitySourceCount += root.GetComponentsInChildren<GravitySource>(true).Length;
             }
 
             EditorSceneManager.CloseScene(scene, true);
 
             bool passed = shipFound && shipHasRigidbody && cameraFound && hudFound &&
-                          eventSystemFound && celestialBodyCount >= 4;
+                          eventSystemFound && celestialBodyCount >= 4 && gravitySourceCount >= 3;
 
             string report = $"ship={shipFound}, rigidbody={shipHasRigidbody}, camera={cameraFound}, " +
-                            $"HUD={hudFound}, EventSystem={eventSystemFound}, celestial bodies={celestialBodyCount}";
+                            $"HUD={hudFound}, EventSystem={eventSystemFound}, celestial bodies={celestialBodyCount}, gravity sources={gravitySourceCount}";
 
             if (passed)
                 Debug.Log($"GALAXY EXPLORER structure validation PASSED: {report}. This is not a runtime or APK test.");
