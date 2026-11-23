@@ -155,6 +155,7 @@ namespace GalaxyExplorer.Editor
             collider.radius = .8f;
             root.AddComponent<Rigidbody>();
             root.AddComponent<SpacecraftController>();
+            root.AddComponent<LandingAssist>();
             return root;
         }
 
@@ -179,6 +180,8 @@ namespace GalaxyExplorer.Editor
                 new Vector2(0, -48), new Vector2(.5f, 1), 28);
             Text modeText = CreateLabel(canvas.transform, "CAM / EXTERNAL",
                 new Vector2(0, -88), new Vector2(.5f, 1), 20);
+            Text statusText = CreateLabel(canvas.transform, "CRUISE / DEEP SPACE",
+                new Vector2(0, -126), new Vector2(.5f, 1), 16);
 
             Slider throttle = CreateThrottle(canvas.transform);
             Button cameraButton = CreateButton(canvas.transform, "CAMERA", new Vector2(-170, 95));
@@ -186,7 +189,7 @@ namespace GalaxyExplorer.Editor
 
             var hud = canvasObject.AddComponent<FlightHUD>();
             hud.Bind(ship.GetComponent<SpacecraftController>(), cameraRig,
-                moveStick, lookStick, speedText, modeText, throttle);
+                moveStick, lookStick, speedText, modeText, statusText, throttle);
             cameraButton.onClick.AddListener(hud.ToggleCamera);
 
             var trigger = brakeButton.gameObject.AddComponent<EventTrigger>();
