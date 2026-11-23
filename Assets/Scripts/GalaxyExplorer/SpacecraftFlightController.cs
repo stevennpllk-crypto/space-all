@@ -39,7 +39,6 @@ public sealed class SpacecraftFlightController : MonoBehaviour
         body.drag = drag;
         body.angularDrag = 2f;
         body.interpolation = RigidbodyInterpolation.Interpolate;
-        body.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     private void Update()
