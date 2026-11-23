@@ -26,10 +26,10 @@ namespace GalaxyExplorer.Editor
             light.intensity = 1.2f;
             lightObject.transform.rotation = Quaternion.Euler(35, -35, 0);
 
-            CreateBody("SUN", Vector3.zero, 8, new Color(1, .55f, .12f), true, .15f);
-            CreateBody("EARTH", new Vector3(0, 0, 42), 3.2f, new Color(.08f, .32f, .85f), false, 5);
-            CreateBody("MOON", new Vector3(7, 1, 47), .9f, new Color(.48f, .5f, .54f), false, 1);
-            CreateBody("MARS", new Vector3(0, 0, 76), 2.2f, new Color(.72f, .25f, .12f), false, 4);
+            CreateBody("SUN", Vector3.zero, 8, new Color(1, .55f, .12f), true, .15f, 0f, 8f, 0f);
+            CreateBody("EARTH", new Vector3(0, 0, 42), 3.2f, new Color(.08f, .32f, .85f), false, 5, 9.81f, 3.2f, 32f);
+            CreateBody("MOON", new Vector3(7, 1, 47), .9f, new Color(.48f, .5f, .54f), false, 1, 1.62f, .9f, 10f);
+            CreateBody("MARS", new Vector3(0, 0, 76), 2.2f, new Color(.72f, .25f, .12f), false, 4, 3.71f, 2.2f, 22f);
 
             CreateStars();
             GameObject ship = CreateShip();
@@ -75,14 +75,14 @@ namespace GalaxyExplorer.Editor
             return material;
         }
 
-        private static void CreateBody(string bodyName, Vector3 position, float radius, Color color, bool emissive, float spin)
+        private static void CreateBody(string bodyName, Vector3 position, float radius, Color color, bool emissive, float spin, float gravity, float gravityRadius, float influenceRadius)
         {
             GameObject body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             body.name = bodyName;
             body.transform.position = position;
             body.transform.localScale = Vector3.one * radius * 2;
             body.GetComponent<Renderer>().sharedMaterial = CreateMaterial(color, emissive);
-            body.AddComponent<CelestialBody>().Configure(bodyName, spin);
+            body.AddComponent<CelestialBody>().Configure(bodyName, spin);\n            body.AddComponent<GravitySource>().Configure(gravity, gravityRadius, influenceRadius);
         }
 
         private static void CreateStars()
