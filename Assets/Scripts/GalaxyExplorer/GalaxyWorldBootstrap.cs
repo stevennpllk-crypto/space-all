@@ -105,11 +105,47 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             surfaceMaterial.mainTexture = PlanetTextureFactory.Create(palette[i], i + 1, i == 0 || i == 5);
             planet.GetComponent<Renderer>().sharedMaterial = surfaceMaterial;
             planet.AddComponent<PlanetRotator>().degreesPerSecond = Random.Range(2f, 8f);
+            if (i == 5) CreatePlanetRing(planet.transform, size);
             var identity = planet.AddComponent<PlanetDiscovery>();
             identity.displayName = "World " + (i + 1);
             identity.description = "An uncharted world. Approach to record this discovery.";
             CreateOrbitRing(orbit);
         }
+    }
+
+    private void CreatePlanetRing(Transform parent, float planetSize)
+    {
+        const int segments = 96;
+        float inner = planetSize * 0.78f;
+        float outer = planetSize * 1.28f;
+        var mesh = new Mesh { name = "Gas Giant Ring Mesh" };
+        var vertices = new Vector3[segments * 2];
+        var triangles = new int[segments * 6];
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+            Vector3 direction = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+            vertices[i * 2] = direction * inner;
+            vertices[i * 2 + 1] = direction * outer;
+            int next = (i + 1) % segments;
+            int t = i * 6;
+            triangles[t] = i * 2;
+            triangles[t + 1] = next * 2 + 1;
+            triangles[t + 2] = i * 2 + 1;
+            triangles[t + 3] = i * 2;
+            triangles[t + 4] = next * 2;
+            triangles[t + 5] = next * 2 + 1;
+        }
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+
+        var ring = new GameObject("Planetary Ring");
+        ring.transform.SetParent(parent, false);
+        var filter = ring.AddComponent<MeshFilter>();
+        filter.sharedMesh = mesh;
+        var renderer = ring.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = MakeMaterial(new Color(0.72f, 0.61f, 0.42f), 0.55f, 0.72f);
     }
 
     private void CreateOrbitRing(float radius)
@@ -141,6 +177,7 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         ship.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
         ship.transform.localScale = new Vector3(1.5f, 2.6f, 1.5f);
         ship.GetComponent<Renderer>().sharedMaterial = MakeMaterial(new Color(0.72f, 0.82f, 0.95f), 0.72f, 0.8f);
+        BuildShipModel(ship.transform);
         var body = ship.AddComponent<Rigidbody>();
         body.mass = 8f;
         body.useGravity = false;
@@ -172,5 +209,30 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
         if (FindObjectOfType<SpaceGameMenu>() == null)
             new GameObject("Galaxy Explorer Menu").AddComponent<SpaceGameMenu>();
+    }
+
+    private void BuildShipModel(Transform root)
+    {
+        Material wingMaterial = MakeMaterial(new Color(0.16f, 0.24f, 0.38f), 0.8f, 0.72f);
+        Material glassMaterial = MakeMaterial(new Color(0.12f, 0.62f, 0.88f), 0.35f, 0.9f);
+        Material engineMaterial = MakeMaterial(new Color(0.12f, 0.42f, 1f), 0.15f, 0.8f);
+
+        CreateShipPart(root, "Left Wing", PrimitiveType.Cube, new Vector3(-1.25f, 0f, -0.15f), new Vector3(1.7f, 0.16f, 1.5f), wingMaterial);
+        CreateShipPart(root, "Right Wing", PrimitiveType.Cube, new Vector3(1.25f, 0f, -0.15f), new Vector3(1.7f, 0.16f, 1.5f), wingMaterial);
+        CreateShipPart(root, "Cockpit", PrimitiveType.Sphere, new Vector3(0f, 0.48f, 1.05f), new Vector3(0.72f, 0.52f, 1.15f), glassMaterial);
+        CreateShipPart(root, "Left Engine", PrimitiveType.Sphere, new Vector3(-0.48f, 0f, -2.15f), Vector3.one * 0.42f, engineMaterial);
+        CreateShipPart(root, "Right Engine", PrimitiveType.Sphere, new Vector3(0.48f, 0f, -2.15f), Vector3.one * 0.42f, engineMaterial);
+    }
+
+    private static void CreateShipPart(Transform parent, string partName, PrimitiveType type, Vector3 localPosition, Vector3 localScale, Material material)
+    {
+        var part = GameObject.CreatePrimitive(type);
+        part.name = partName;
+        part.transform.SetParent(parent, false);
+        part.transform.localPosition = localPosition;
+        part.transform.localScale = localScale;
+        part.GetComponent<Renderer>().sharedMaterial = material;
+        var collider = part.GetComponent<Collider>();
+        if (collider != null) Object.Destroy(collider);
     }
 }
