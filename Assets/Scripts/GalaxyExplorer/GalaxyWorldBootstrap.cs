@@ -67,7 +67,10 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         shape.enabled = false;
         var renderer = stars.GetComponent<ParticleSystemRenderer>();
         renderer.renderMode = ParticleSystemRenderMode.Billboard;
-        renderer.material = MakeMaterial(Color.white);
+        Shader particleShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (particleShader == null) particleShader = Shader.Find("Particles/Standard Unlit");
+        if (particleShader == null) particleShader = Shader.Find("Sprites/Default");
+        renderer.material = new Material(particleShader);
         var batch = new ParticleSystem.EmitParams();
         for (int i = 0; i < 2200; i++)
         {
@@ -165,5 +168,7 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
 
         if (FindObjectOfType<SpaceHUD>() == null)
             new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
+        if (FindObjectOfType<SpaceGameMenu>() == null)
+            new GameObject("Galaxy Explorer Menu").AddComponent<SpaceGameMenu>();
     }
 }
