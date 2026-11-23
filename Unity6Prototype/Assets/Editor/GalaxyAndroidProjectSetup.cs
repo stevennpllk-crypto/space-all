@@ -17,7 +17,19 @@ namespace GalaxyExplorer.Editor
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            Debug.Log("Galaxy Explorer Android settings applied. Select Android in Build Profiles and install the required Unity modules.");
+
+            // High visual preset; validate GPU cost on the target device before release.
+            PlayerSettings.colorSpace = ColorSpace.Linear;
+            QualitySettings.shadows = ShadowQuality.All;
+            QualitySettings.shadowResolution = ShadowResolution.VeryHigh;
+            QualitySettings.shadowDistance = 120f;
+            QualitySettings.shadowCascades = 4;
+            QualitySettings.antiAliasing = 4;
+            QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
+            QualitySettings.lodBias = 2f;
+            QualitySettings.maximumLODLevel = 0;
+            QualitySettings.vSyncCount = 0;
+            Debug.Log("Galaxy Explorer high-quality Android defaults applied. Confirm URP asset MSAA/HDR and profile GPU cost on target hardware.");
         }
     }
 }
