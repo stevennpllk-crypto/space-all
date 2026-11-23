@@ -185,6 +185,7 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         body.angularDrag = 2f;
         body.interpolation = RigidbodyInterpolation.Interpolate;
         ship.AddComponent<SpacecraftFlightController>();
+        ship.AddComponent<ProceduralSpaceAudio>();
 
         Camera camera = Camera.main;
         GameObject cameraObject;
