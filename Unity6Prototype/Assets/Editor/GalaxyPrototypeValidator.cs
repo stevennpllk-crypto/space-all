@@ -29,7 +29,8 @@ namespace GalaxyExplorer.Editor
             bool hudFound = false;
             bool eventSystemFound = false;
             bool shipHasRigidbody = false;
-            int celestialBodyCount = 0;\n            int gravitySourceCount = 0;
+            int celestialBodyCount = 0;
+            int gravitySourceCount = 0;
 
             foreach (GameObject root in scene.GetRootGameObjects())
             {
@@ -43,7 +44,8 @@ namespace GalaxyExplorer.Editor
                 cameraFound |= root.GetComponentInChildren<CameraRigController>(true) != null;
                 hudFound |= root.GetComponentInChildren<FlightHUD>(true) != null;
                 eventSystemFound |= root.GetComponentInChildren<EventSystem>(true) != null;
-                celestialBodyCount += root.GetComponentsInChildren<CelestialBody>(true).Length;\n                gravitySourceCount += root.GetComponentsInChildren<GravitySource>(true).Length;
+                celestialBodyCount += root.GetComponentsInChildren<CelestialBody>(true).Length;
+                gravitySourceCount += root.GetComponentsInChildren<GravitySource>(true).Length;
             }
 
             EditorSceneManager.CloseScene(scene, true);
