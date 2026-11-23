@@ -1,0 +1,14 @@
+{
+  "name": "GalaxyExplorer.Runtime",
+  "rootNamespace": "GalaxyExplorer",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
