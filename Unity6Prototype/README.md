@@ -37,6 +37,8 @@ Source-first Unity foundation for an Android space-flight prototype. This is not
 ## Known limitations
 - Procedural primitive geometry and flat colors are placeholders, not final NASA textures or production spacecraft art.
 - Planet sizes and positions are gameplay-scaled, not astronomical distances.
+- Earth, Moon and Mars have configurable inverse-square gravity fields with finite influence radii. Gravity values are gameplay approximations; this is not an N-body orbital simulation.
+- Planet collision is present through primitive colliders, but a dedicated landing state, surface movement and astronaut mode are not implemented.
 - Flight currently uses local Rigidbody motion with gravity disabled; orbital mechanics, planetary landing, atmospheric flight and astronaut mode are later milestones.
 - The scene uses Unity UI/EventSystem pointer handlers; it does not yet use a dedicated Input System action map.
 - URP renderer, particle starfield and Android graphics settings still require target-device verification.
