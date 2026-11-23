@@ -103,6 +103,12 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             planet.transform.localScale = Vector3.one * size;
             var surfaceMaterial = MakeMaterial(palette[i], 0.12f, 0.62f);
             surfaceMaterial.mainTexture = PlanetTextureFactory.Create(palette[i], i + 1, i == 0 || i == 5);
+            if (surfaceMaterial.HasProperty("_BumpMap"))
+            {
+                surfaceMaterial.SetTexture("_BumpMap", PlanetTextureFactory.CreateNormalMap(i + 1));
+                surfaceMaterial.EnableKeyword("_NORMALMAP");
+                if (surfaceMaterial.HasProperty("_BumpScale")) surfaceMaterial.SetFloat("_BumpScale", 0.65f);
+            }
             planet.GetComponent<Renderer>().sharedMaterial = surfaceMaterial;
             planet.AddComponent<PlanetRotator>().degreesPerSecond = Random.Range(2f, 8f);
             if (i == 5) CreatePlanetRing(planet.transform, size);
