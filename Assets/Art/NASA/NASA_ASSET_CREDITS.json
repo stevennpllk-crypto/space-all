@@ -1,0 +1,98 @@
+{
+  "source": "NASA Image and Video Library",
+  "api": "https://images-api.nasa.gov",
+  "assets": [
+    {
+      "category": "earth",
+      "file": "earth_gsfc_20171208_archive_e002131.jpg",
+      "nasa_id": "GSFC_20171208_Archive_e002131",
+      "title": "NASA Blue Marble 2007 West",
+      "date_created": "2017-12-08T00:00:00Z",
+      "center": "GSFC",
+      "photographer": "",
+      "secondary_creator": "",
+      "source_page": "https://images.nasa.gov/details/GSFC_20171208_Archive_e002131",
+      "asset_url": "http://images-assets.nasa.gov/image/GSFC_20171208_Archive_e002131/GSFC_20171208_Archive_e002131~orig.jpg",
+      "bytes": 2782498
+    },
+    {
+      "category": "mars",
+      "file": "mars_pia24264.jpg",
+      "nasa_id": "PIA24264",
+      "title": "Mastcam-Z's First 360-Degree Panorama",
+      "date_created": "2021-02-24T00:00:00Z",
+      "center": "JPL",
+      "photographer": "",
+      "secondary_creator": "NASA/JPL-Caltech/MSSS/ASU",
+      "source_page": "https://images.nasa.gov/details/PIA24264",
+      "asset_url": "http://images-assets.nasa.gov/image/PIA24264/PIA24264~orig.jpg",
+      "bytes": 2729297
+    },
+    {
+      "category": "jupiter",
+      "file": "jupiter_pia25020.jpg",
+      "nasa_id": "PIA25020",
+      "title": "NASA's Juno Mission Captures Lightning On Jupiter",
+      "date_created": "2023-06-15T00:00:00Z",
+      "center": "JPL",
+      "photographer": "",
+      "secondary_creator": "Image data: NASA/JPL-Caltech/SwRI/MSSS Image processing by Kevin M. Gill © CC BY",
+      "source_page": "https://images.nasa.gov/details/PIA25020",
+      "asset_url": "http://images-assets.nasa.gov/image/PIA25020/PIA25020~orig.jpg",
+      "bytes": 63743
+    },
+    {
+      "category": "saturn",
+      "file": "saturn_pia14858.jpg",
+      "nasa_id": "PIA14858",
+      "title": "Saturn Geyser Moon Enceladus Shows off for NASA Cassini",
+      "date_created": "2011-10-05T00:40:12Z",
+      "center": "JPL",
+      "photographer": "",
+      "secondary_creator": "NASA/JPL-Caltech/Space Science Institute",
+      "source_page": "https://images.nasa.gov/details/PIA14858",
+      "asset_url": "http://images-assets.nasa.gov/image/PIA14858/PIA14858~orig.jpg",
+      "bytes": 23969
+    },
+    {
+      "category": "nebula",
+      "file": "nebula_gsfc_20171208_archive_e000273.jpg",
+      "nasa_id": "GSFC_20171208_Archive_e000273",
+      "title": "NASA's Hubble Captures the Beating Heart of the Crab Nebula",
+      "date_created": "2017-12-08T00:00:00Z",
+      "center": "GSFC",
+      "photographer": "",
+      "secondary_creator": "",
+      "source_page": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000273",
+      "asset_url": "http://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000273/GSFC_20171208_Archive_e000273~orig.jpg",
+      "bytes": 1547261
+    },
+    {
+      "category": "galaxy",
+      "file": "galaxy_pia23123.jpg",
+      "nasa_id": "PIA23123",
+      "title": "A Field of Galaxies Seen by Spitzer and Hubble",
+      "date_created": "2019-05-08T00:00:00Z",
+      "center": "JPL",
+      "photographer": "",
+      "secondary_creator": "NASA/JPL-Caltech/ESA/Spitzer/P. Oesch/S. De Barros/ I.Labbe",
+      "source_page": "https://images.nasa.gov/details/PIA23123",
+      "asset_url": "http://images-assets.nasa.gov/image/PIA23123/PIA23123~orig.jpg",
+      "bytes": 245907
+    },
+    {
+      "category": "moon",
+      "file": "moon_pia15515.jpg",
+      "nasa_id": "PIA15515",
+      "title": "Far Side of Moon Imaged by MoonKAM",
+      "date_created": "2012-03-22T17:00:02Z",
+      "center": "JPL",
+      "photographer": "",
+      "secondary_creator": "NASA/Caltech-JPL/MIT/SRS",
+      "source_page": "https://images.nasa.gov/details/PIA15515",
+      "asset_url": "http://images-assets.nasa.gov/image/PIA15515/PIA15515~orig.jpg",
+      "bytes": 64932
+    }
+  ],
+  "warnings": []
+}
