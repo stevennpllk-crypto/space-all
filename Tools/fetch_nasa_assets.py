@@ -34,7 +34,10 @@ def is_obvious_third_party(item):
 
 def choose_asset(urls):
     candidates = []
-    for url in urls:
+    for entry in urls:
+        url = entry.get("href") if isinstance(entry, dict) else entry
+        if not isinstance(url, str):
+            continue
         low = url.lower().split("?")[0]
         if low.endswith(IMAGE_EXTS) and not any(tag in low for tag in ("thumb", "small", "medium")):
             score = 100 if "~orig" in low else 0
