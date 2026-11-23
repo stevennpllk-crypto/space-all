@@ -48,7 +48,7 @@ namespace GalaxyExplorer.Editor {
    var trigger=brake.gameObject.AddComponent<EventTrigger>();var down=new EventTrigger.Entry{eventID=EventTriggerType.PointerDown};down.callback.AddListener(_=>hud.SetBrake(true));trigger.triggers.Add(down);var up=new EventTrigger.Entry{eventID=EventTriggerType.PointerUp};up.callback.AddListener(_=>hud.SetBrake(false));trigger.triggers.Add(up);
   }
   static VirtualJoystick Stick(Transform parent,string label,Vector2 pos,Vector2 anchor){
-   var g=new GameObject(label,typeof(RectTransform),typeof(Image),typeof(VirtualJoystick));g.transform.SetParent(parent,false);var r=(RectTransform)g.transform;r.anchorMin=anchor;r.anchorMax=anchor;r.pivot=new Vector2(anchor.x,0);r.anchoredPosition=pos;r.sizeDelta=new Vector2(210,210);g.GetComponent<Image>().color=new Color(.05f,.55f,.75f,.22f);
+   var g=new GameObject(label,typeof(RectTransform),typeof(Image),typeof(VirtualJoystick));g.transform.SetParent(parent,false);var r=(RectTransform)g.transform;r.anchorMin=anchor;r.anchorMax=anchor;r.pivot=new Vector2(.5f,.5f);r.anchoredPosition=pos;r.sizeDelta=new Vector2(210,210);g.GetComponent<Image>().color=new Color(.05f,.55f,.75f,.22f);
    var h=new GameObject("Handle",typeof(RectTransform),typeof(Image));h.transform.SetParent(g.transform,false);var hr=(RectTransform)h.transform;hr.sizeDelta=new Vector2(76,76);h.GetComponent<Image>().color=new Color(.2f,.85f,1,.72f);
    typeof(VirtualJoystick).GetField("handle",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).SetValue(g.GetComponent<VirtualJoystick>(),hr);Label(g.transform,label,new Vector2(0,-118),new Vector2(.5f,.5f),13);return g.GetComponent<VirtualJoystick>();
   }
