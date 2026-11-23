@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Lightweight runtime pause and discovery overlay.</summary>
+/// <summary>Pause, discovery journal, and live graphics quality controls.</summary>
 public sealed class SpaceGameMenu : MonoBehaviour
 {
     private bool menuOpen;
@@ -20,25 +20,25 @@ public sealed class SpaceGameMenu : MonoBehaviour
 
         if (!menuOpen) return;
 
-        float panelWidth = Mathf.Min(520f, Screen.width / scale - 36f);
-        float panelHeight = Mathf.Min(600f, Screen.height / scale - 70f);
+        float panelWidth = Mathf.Min(560f, Screen.width / scale - 36f);
+        float panelHeight = Mathf.Min(660f, Screen.height / scale - 70f);
         Rect panel = new Rect((Screen.width / scale - panelWidth) * 0.5f,
                               (Screen.height / scale - panelHeight) * 0.5f,
                               panelWidth, panelHeight);
         GUI.Box(panel, GUIContent.none);
         GUILayout.BeginArea(new Rect(panel.x + 24f, panel.y + 20f, panel.width - 48f, panel.height - 40f));
         GUILayout.Label("GALAXY EXPLORER", heading);
-        GUILayout.Space(18f);
+        GUILayout.Space(12f);
 
-        if (GUILayout.Button("RESUME FLIGHT", GUILayout.Height(48f))) ToggleMenu();
-        if (GUILayout.Button(showJournal ? "CLOSE JOURNAL" : "DISCOVERY JOURNAL", GUILayout.Height(48f)))
+        if (GUILayout.Button("RESUME FLIGHT", GUILayout.Height(46f))) ToggleMenu();
+        if (GUILayout.Button(showJournal ? "CLOSE JOURNAL" : "DISCOVERY JOURNAL", GUILayout.Height(46f)))
             showJournal = !showJournal;
 
         if (showJournal)
         {
             GUILayout.Space(12f);
             GUILayout.Label("RECORDED WORLDS", heading);
-            journalScroll = GUILayout.BeginScrollView(journalScroll, GUILayout.Height(panelHeight - 210f));
+            journalScroll = GUILayout.BeginScrollView(journalScroll, GUILayout.Height(panelHeight - 250f));
             var names = DiscoveryLog.GetDiscoveredNames();
             if (names.Count == 0) GUILayout.Label("No discoveries yet. Explore nearby planets.", body);
             for (int i = 0; i < names.Count; i++) GUILayout.Label("• " + names[i], body);
@@ -46,12 +46,36 @@ public sealed class SpaceGameMenu : MonoBehaviour
         }
         else
         {
-            GUILayout.Space(20f);
-            GUILayout.Label("Explore the nearby worlds. Approach a planet to add it to your journal.", body);
+            GUILayout.Space(14f);
+            GUILayout.Label("GRAPHICS QUALITY", heading);
+            GalaxyQualityManager quality = GalaxyQualityManager.Instance;
+            if (quality != null)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("QUALITY", body, GUILayout.Width(90f));
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(quality.QualityPercent + "%", heading, GUILayout.Width(76f));
+                GUILayout.EndHorizontal();
+
+                float selected = GUILayout.HorizontalSlider(quality.QualityPercent, 50f, 150f, GUILayout.Height(34f));
+                if (Mathf.Abs(selected - quality.QualityPercent) >= 2f)
+                    quality.SetQualityPercent(selected);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("50%  PERFORMANCE", body);
+                GUILayout.FlexibleSpace();
+                GUILayout.Label("150%  ULTRA", body);
+                GUILayout.EndHorizontal();
+                GUILayout.Label("Higher values increase render resolution, detail and shadow distance. Performance depends on your device.", body);
+            }
+            else GUILayout.Label("Graphics manager is starting...", body);
+
+            GUILayout.Space(14f);
+            GUILayout.Label("Explore nearby worlds and approach planets to record discoveries.", body);
             GUILayout.Space(8f);
             GUILayout.Label("Desktop: WASD / mouse / Q-E / Shift-Ctrl", body);
             GUILayout.Label("Mobile: left-side drag to steer, right-side drag to look.", body);
-            GUILayout.Label("Graphics: " + GalaxyQualityManager.ActiveTier, body);
+            GUILayout.Label("Device profile: " + GalaxyQualityManager.ActiveTier, body);
         }
 
         GUILayout.FlexibleSpace();
@@ -69,7 +93,12 @@ public sealed class SpaceGameMenu : MonoBehaviour
     private void ToggleMenu()
     {
         menuOpen = !menuOpen;
-        if (!menuOpen) showJournal = false;
+        if (!menuOpen)
+        {
+            showJournal = false;
+            if (GalaxyQualityManager.Instance != null)
+                GalaxyQualityManager.Instance.SaveSettings();
+        }
         Time.timeScale = menuOpen ? 0f : 1f;
         Cursor.visible = menuOpen;
         Cursor.lockState = menuOpen ? CursorLockMode.None : CursorLockMode.Locked;
