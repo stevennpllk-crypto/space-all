@@ -192,12 +192,12 @@ namespace GalaxyExplorer.Scope
             sun.transform.localScale = Vector3.one * 2.8f;
             Renderer renderer = sun.GetComponent<Renderer>();
             Material material = NewMaterial(new Color(1f, 0.62f, 0.12f));
-            if (material.HasProperty("_EmissionColor"))
+            if (material != null && material.HasProperty("_EmissionColor"))
             {
                 material.EnableKeyword("_EMISSION");
                 material.SetColor("_EmissionColor", new Color(1f, 0.38f, 0.04f) * 2.5f);
             }
-            renderer.material = material;
+            if (renderer != null && material != null) renderer.material = material;
             Destroy(sun.GetComponent<Collider>());
             AddLabel(sun.transform, "SUN", 2.0f);
         }
@@ -210,7 +210,9 @@ namespace GalaxyExplorer.Scope
             float visualRadius = Mathf.Max(0.22f, Mathf.Pow(definition.radius, 0.55f) * RadiusScale);
             planet.transform.localScale = Vector3.one * visualRadius * 2f;
             planet.transform.position = new Vector3(definition.orbitRadius * DistanceScale, 0f, 0f);
-            planet.GetComponent<Renderer>().material = NewMaterial(definition.color);
+            Material planetMaterial = NewMaterial(definition.color);
+            Renderer planetRenderer = planet.GetComponent<Renderer>();
+            if (planetRenderer != null && planetMaterial != null) planetRenderer.material = planetMaterial;
 
             BodyView view = new BodyView { data = definition, transform = planet.transform };
             if (showOrbitPaths)
@@ -232,7 +234,8 @@ namespace GalaxyExplorer.Scope
             line.loop = true;
             line.positionCount = OrbitSegments;
             line.widthMultiplier = 0.025f;
-            line.material = GetLineMaterial();
+            Material orbitMaterial = GetLineMaterial();
+            if (orbitMaterial != null) line.sharedMaterial = orbitMaterial;
             line.startColor = new Color(0.35f, 0.48f, 0.68f, 0.38f);
             line.endColor = line.startColor;
 
@@ -254,7 +257,8 @@ namespace GalaxyExplorer.Scope
             ring.loop = true;
             ring.positionCount = 128;
             ring.widthMultiplier = radius * 0.55f;
-            ring.material = GetLineMaterial();
+            Material ringMaterial = GetLineMaterial();
+            if (ringMaterial != null) ring.sharedMaterial = ringMaterial;
             ring.startColor = new Color(0.78f, 0.68f, 0.48f, 0.75f);
             ring.endColor = ring.startColor;
             for (int i = 0; i < ring.positionCount; i++)
@@ -291,8 +295,14 @@ namespace GalaxyExplorer.Scope
             MeshFilter filter = starRoot.AddComponent<MeshFilter>();
             filter.sharedMesh = mesh;
             MeshRenderer renderer = starRoot.AddComponent<MeshRenderer>();
-            starMaterial = new Material(Shader.Find("Sprites/Default"));
-            renderer.sharedMaterial = starMaterial;
+            Shader starShader = Shader.Find("Sprites/Default");
+            if (starShader == null) starShader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (starShader == null) starShader = Shader.Find("Hidden/InternalErrorShader");
+            if (starShader != null)
+            {
+                starMaterial = new Material(starShader);
+                renderer.sharedMaterial = starMaterial;
+            }
         }
 
         private void AddLabel(Transform target, string text, float height)
@@ -314,6 +324,8 @@ namespace GalaxyExplorer.Scope
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+            if (shader == null) return null;
             Material material = new Material(shader);
             if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
             if (material.HasProperty("_Color")) material.SetColor("_Color", color);
@@ -326,7 +338,8 @@ namespace GalaxyExplorer.Scope
             {
                 Shader shader = Shader.Find("Sprites/Default");
                 if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-                lineMaterial = new Material(shader);
+                if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+                if (shader != null) lineMaterial = new Material(shader);
             }
             return lineMaterial;
         }
