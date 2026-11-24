@@ -117,3 +117,11 @@ for asset in nasa_manifest["assets"]:
     if not (ROOT / "Assets/Art/NASA" / asset["file"]).is_file():
         raise SystemExit("Missing NASA image asset: " + asset["file"])
 
+
+# Keep Android CI from spending a full Unity build attempt without its license secret.
+android_workflow = (ROOT / ".github/workflows/android-apk.yml").read_text(encoding="utf-8")
+if "Check Unity license configuration" not in android_workflow:
+    raise SystemExit("Android workflow must check Unity license configuration before invoking Unity.")
+if 'if [[ -z "${UNITY_LICENSE//[[:space:]]/}" ]]; then' not in android_workflow:
+    raise SystemExit("Android workflow must reject an empty or whitespace-only Unity license secret.")
+print("Android build license preflight checks passed.")
