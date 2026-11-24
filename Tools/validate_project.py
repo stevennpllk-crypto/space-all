@@ -125,3 +125,17 @@ if "Check Unity license configuration" not in android_workflow:
 if 'if [[ -z "${UNITY_LICENSE//[[:space:]]/}" ]]; then' not in android_workflow:
     raise SystemExit("Android workflow must reject an empty or whitespace-only Unity license secret.")
 print("Android build license preflight checks passed.")
+
+# Keep the Android build instructions aligned with the supported license workflow.
+build_guide = (ROOT / "BUILD_ANDROID.md").read_text(encoding="utf-8")
+for required_text in [
+    "Unity Personal license",
+    "Preferences → Licenses → Add",
+    "UNITY_LICENSE",
+    "No Unity compilation was attempted",
+]:
+    if required_text not in build_guide:
+        raise SystemExit("Android build guide is missing current license guidance: " + required_text)
+if "bypass Unity's license checks" not in build_guide:
+    raise SystemExit("Android build guide must explicitly reject license-check bypasses.")
+print("Android license documentation checks passed.")
