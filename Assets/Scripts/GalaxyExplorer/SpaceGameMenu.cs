@@ -71,10 +71,10 @@ public sealed class SpaceGameMenu : MonoBehaviour
             else GUILayout.Label("Graphics manager is starting...", body);
 
             GUILayout.Space(14f);
-            GUILayout.Label("Explore nearby worlds and approach planets to record discoveries.", body);
+            GUILayout.Label("Fly freely through the scene and select planets to inspect them.", body);
             GUILayout.Space(8f);
-            GUILayout.Label("Desktop: WASD / mouse / Q-E / Shift-Ctrl", body);
-            GUILayout.Label("Mobile: left-side drag to steer, right-side drag to look.", body);
+            GUILayout.Label("Desktop: WASD fly • Q/E vertical • mouse orbit • right-drag pan • wheel zoom", body);
+            GUILayout.Label("Mobile: one finger orbit • two fingers pan and zoom.", body);
             GUILayout.Label("Device profile: " + GalaxyQualityManager.ActiveTier, body);
         }
 
