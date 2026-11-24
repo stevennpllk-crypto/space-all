@@ -171,7 +171,7 @@ print("Android build license preflight checks passed.")
 build_guide = (ROOT / "BUILD_ANDROID.md").read_text(encoding="utf-8")
 for required_text in [
     "Unity Personal license",
-    "Preferences → Licenses → Add",
+    "Settings → Licenses → Add",
     "UNITY_LICENSE",
     "UNITY_EMAIL",
     "UNITY_PASSWORD",
