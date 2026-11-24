@@ -127,6 +127,10 @@ namespace GalaxyExplorer.Scope
                 bodies.Add(view);
             }
 
+            // Add the major natural satellites after their parent planets exist.
+            if (GetComponent<NaturalSatelliteSystem>() == null)
+                gameObject.AddComponent<NaturalSatelliteSystem>();
+
             if (Camera.main == null)
             {
                 GameObject cameraObject = new GameObject("Scope Camera");
