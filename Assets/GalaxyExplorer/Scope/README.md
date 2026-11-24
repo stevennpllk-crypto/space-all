@@ -5,8 +5,8 @@ This folder adds a self-contained Unity 6 Solar System Scope prototype to Galaxy
 ## Create the demo scene
 1. Open the project in Unity 6.
 2. Wait for scripts to compile.
-3. Select **Galaxy Explorer → Create Solar System Scope Demo**.
-4. Save the generated scene under `Assets/Scenes` (or another project scene folder).
+3. Select **Galaxy Explorer → Setup → Create or Repair Starter Scene**.
+4. Open `Assets/Scenes/GalaxyExplorer.unity` (the installer also adds it to Build Settings).
 5. Press Play.
 
 ## Included in this prototype
