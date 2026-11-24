@@ -79,6 +79,9 @@ namespace GalaxyExplorer.Scope
 
         private void ReadMouse()
         {
+            if (IsPointerOverUi(Input.mousePosition))
+                return;
+
             if (Input.GetMouseButton(0))
             {
                 yaw += Input.GetAxis("Mouse X") * orbitSensitivity * 8f;
@@ -102,6 +105,11 @@ namespace GalaxyExplorer.Scope
             if (Input.touchCount == 1)
             {
                 Touch touch = Input.GetTouch(0);
+                if (IsPointerOverUi(touch.position))
+                {
+                    lastPinchDistance = 0f;
+                    return;
+                }
                 if (touch.phase == TouchPhase.Moved)
                 {
                     yaw += touch.deltaPosition.x * orbitSensitivity * 0.12f;
@@ -114,6 +122,11 @@ namespace GalaxyExplorer.Scope
             {
                 Touch first = Input.GetTouch(0);
                 Touch second = Input.GetTouch(1);
+                if (IsPointerOverUi(first.position) || IsPointerOverUi(second.position))
+                {
+                    lastPinchDistance = 0f;
+                    return;
+                }
                 float currentDistance = Vector2.Distance(first.position, second.position);
                 Vector2 center = (first.position + second.position) * 0.5f;
 
@@ -132,6 +145,26 @@ namespace GalaxyExplorer.Scope
             {
                 lastPinchDistance = 0f;
             }
+        }
+
+        private bool IsPointerOverUi(Vector2 screenPosition)
+        {
+            // Keep camera gestures from moving the scene while the user interacts
+            // with the runtime IMGUI catalogs and simulation controls.
+            float scale = Mathf.Clamp(Screen.width / 1100f, 0.72f, 1.15f);
+            Vector2 point = new Vector2(screenPosition.x / scale,
+                (Screen.height - screenPosition.y) / scale);
+            float width = Screen.width / scale;
+            float height = Screen.height / scale;
+
+            return new Rect(18f, 18f, 310f, 94f).Contains(point) ||
+                   new Rect(18f, 125f, 310f, 190f).Contains(point) ||
+                   new Rect(width - 190f, 18f, 170f, 130f).Contains(point) ||
+                   new Rect(18f, height - 48f, 540f, 42f).Contains(point) ||
+                   new Rect(width - 230f, 164f, 210f, 222f).Contains(point) ||
+                   new Rect(18f, 326f, 310f, 120f).Contains(point) ||
+                   new Rect(width - 230f, 398f, 210f, 194f).Contains(point) ||
+                   new Rect(18f, 455f, 310f, 116f).Contains(point);
         }
 
         private void ReadKeyboardFlight()
