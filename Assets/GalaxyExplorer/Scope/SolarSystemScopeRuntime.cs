@@ -222,9 +222,6 @@ namespace GalaxyExplorer.Scope
             if (showOrbitPaths)
                 view.orbit = CreateOrbit(definition.orbitRadius * DistanceScale, definition.name + " Orbit");
 
-            if (definition.name == "Saturn")
-                CreateSaturnRings(planet.transform, visualRadius);
-
             AddLabel(planet.transform, definition.name, visualRadius + 0.45f);
             return view;
         }
@@ -249,28 +246,6 @@ namespace GalaxyExplorer.Scope
                 line.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius));
             }
             return line;
-        }
-
-        private void CreateSaturnRings(Transform parent, float radius)
-        {
-            GameObject ringObject = new GameObject("Saturn Rings");
-            ringObject.transform.SetParent(parent, false);
-            ringObject.transform.localRotation = Quaternion.Euler(25f, 0f, 12f);
-            LineRenderer ring = ringObject.AddComponent<LineRenderer>();
-            ring.useWorldSpace = false;
-            ring.loop = true;
-            ring.positionCount = 128;
-            ring.widthMultiplier = radius * 0.55f;
-            Material ringMaterial = GetLineMaterial();
-            if (ringMaterial != null) ring.sharedMaterial = ringMaterial;
-            ring.startColor = new Color(0.78f, 0.68f, 0.48f, 0.75f);
-            ring.endColor = ring.startColor;
-            for (int i = 0; i < ring.positionCount; i++)
-            {
-                float angle = i * Mathf.PI * 2f / ring.positionCount;
-                ring.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius * 1.55f, 0f,
-                    Mathf.Sin(angle) * radius * 1.55f));
-            }
         }
 
         private void CreateStarfield()
