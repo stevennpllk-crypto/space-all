@@ -85,6 +85,16 @@ if "Matrix4x4 previousMatrix = GUI.matrix;" not in runtime_source or "GUI.matrix
     raise SystemExit("Scope HUD must restore the shared IMGUI matrix after drawing.")
 print("IMGUI state restoration checks passed.")
 
+camera_source = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeCamera.cs").read_text(encoding="utf-8")
+if "IsPointerOverUi(Input.mousePosition)" not in camera_source:
+    raise SystemExit("Mouse camera gestures must ignore exploration UI panels.")
+if "IsPointerOverUi(touch.position)" not in camera_source:
+    raise SystemExit("Single-touch camera gestures must ignore exploration UI panels.")
+if "IsPointerOverUi(first.position) || IsPointerOverUi(second.position)" not in camera_source:
+    raise SystemExit("Pinch gestures must ignore touches that begin on exploration UI panels.")
+print("Camera gesture UI guards passed.")
+
+
 
 
 with (ROOT / "Assets/Art/NASA/NASA_ASSET_CREDITS.json").open(encoding="utf-8") as handle:
