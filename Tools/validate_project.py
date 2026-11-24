@@ -81,7 +81,11 @@ if 'scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();' not
     raise SystemExit("Starter scene must launch the eight-planet Solar System Scope runtime.")
 if 'bootstrap.AddComponent<GalaxyWorldBootstrap>();' in scene_installer:
     raise SystemExit("Starter scene must not replace the Solar System Scope with the generic fallback world.")
-print("Solar System Scope starter-scene wiring checks passed.")
+if "starterCamera.transform.position = new Vector3(0f, 16f, -34f);" not in scene_installer:
+    raise SystemExit("Starter scene camera must begin from the elevated Solar System overview position.")
+if "starterCamera.transform.LookAt(Vector3.zero);" not in scene_installer:
+    raise SystemExit("Starter scene camera must initially face the Solar System origin.")
+print("Solar System Scope starter-scene wiring and camera checks passed.")
 
 # Guard against regressions in runtime material creation and ownership.
 nearby_source = (ROOT / "Assets/GalaxyExplorer/Scope/NearbyStarCatalog.cs").read_text(encoding="utf-8")
