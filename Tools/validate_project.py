@@ -58,6 +58,14 @@ if "m_EditorVersion: 6000." not in version:
 print("Source validation passed: required files and JSON configuration are present.")
 print("Note: this check does not compile Unity C# or create an APK.")
 
+# Prevent custom runtime asmdef scripts from referencing predefined Assembly-CSharp Scope scripts.
+bootstrap_source = (ROOT / "Assets/Scripts/GalaxyExplorer/GalaxyWorldBootstrap.cs").read_text(encoding="utf-8")
+if "GalaxyExplorer.Scope.SolarSystemScopeCamera" in bootstrap_source or "GalaxyExplorer.Scope.GalaxyExplorerVRSupport" in bootstrap_source:
+    raise SystemExit("GalaxyExplorer.Runtime asmdef must not reference Scope scripts in Assembly-CSharp.")
+if "GalaxyExplorer.Scope.SolarSystemScopeRuntime" in bootstrap_source:
+    raise SystemExit("Runtime bootstrap must detect the Scope runtime without a compile-time assembly reference.")
+print("Unity assembly-boundary checks passed.")
+
 # Ensure the generated starter scene launches the actual Solar System Scope runtime.
 scene_installer = (ROOT / "Assets/Editor/GalaxySceneInstaller.cs").read_text(encoding="utf-8")
 if 'scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();' not in scene_installer:
