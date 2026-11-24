@@ -109,10 +109,14 @@ namespace GalaxyExplorer.Scope
                 }
             }
 
-            if (Input.GetMouseButtonDown(0) && !IsPointerOverGui())
+            if (Input.GetMouseButtonDown(0) && !IsPointerOverGui(Input.mousePosition))
                 SelectAt(Input.mousePosition);
             if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)
-                SelectAt(Input.GetTouch(0).position);
+            {
+                Vector2 touchPosition = Input.GetTouch(0).position;
+                if (!IsPointerOverGui(touchPosition))
+                    SelectAt(touchPosition);
+            }
         }
 
         private void BuildScene()
@@ -364,9 +368,35 @@ namespace GalaxyExplorer.Scope
             }
         }
 
-        private bool IsPointerOverGui()
+        private bool IsPointerOverGui(Vector2 screenPosition)
         {
-            return Event.current != null && Event.current.type == EventType.Used;
+            // Update() runs outside IMGUI's event loop, so Event.current is not a
+            // reliable way to detect clicks consumed by the on-screen catalog panels.
+            float scale = Mathf.Clamp(Screen.width / 1100f, 0.72f, 1.15f);
+            Vector2 guiPoint = new Vector2(screenPosition.x / scale,
+                (Screen.height - screenPosition.y) / scale);
+            float logicalWidth = Screen.width / scale;
+            float logicalHeight = Screen.height / scale;
+
+            Rect[] interactivePanels =
+            {
+                new Rect(18f, 18f, 310f, 94f),                         // Header
+                new Rect(18f, 125f, 310f, 190f),                       // Selected body
+                new Rect(logicalWidth - 190f, 18f, 170f, 130f),       // Simulation controls
+                new Rect(18f, logicalHeight - 48f, 540f, 42f),        // Control hints
+                new Rect(logicalWidth - 230f, 164f, 210f, 222f),      // Nearby stars
+                new Rect(18f, 326f, 310f, 120f),                      // Star details
+                new Rect(logicalWidth - 230f, 398f, 210f, 194f),      // Deep-space destinations
+                new Rect(18f, 455f, 310f, 116f)                       // Destination details
+            };
+
+            foreach (Rect panel in interactivePanels)
+            {
+                if (panel.Contains(guiPoint))
+                    return true;
+            }
+
+            return false;
         }
 
         private void OnGUI()
