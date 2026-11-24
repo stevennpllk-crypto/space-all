@@ -70,3 +70,10 @@ The scene uses compressed distances. Free-flight movement is a navigation aid, n
 ## Optional VR mode
 
 `GalaxyExplorerVRSupport` exposes VR runtime status and configures the camera for both eyes. Head pose is read from Unity XR when an XR runtime is active. A working headset experience still requires an OpenXR-compatible XR Plug-in Management loader and the correct provider settings for the target headset; this repository does not claim headset validation. The standard non-VR camera controls remain available when XR is inactive. Test comfort, frame rate, and controller interaction on the actual target headset before release.
+
+
+## Smooth navigation and deep-space destinations
+
+Camera focus now eases toward selected targets instead of snapping the focus point. Zoom changes also ease toward their requested distance. The deep-space destination catalog adds selectable illustrative markers for the Orion Nebula, Crab Nebula, Andromeda Galaxy, and Sombrero Galaxy alongside the nearby-star catalog.
+
+These markers are educational navigation landmarks: their scene positions, apparent sizes, and simple sphere visuals are not astronomical scale models or scientific nebula/galaxy renderings. The free-flight camera remains the navigation method; no spacecraft is spawned.
