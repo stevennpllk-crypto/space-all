@@ -62,7 +62,7 @@ print("Note: this check does not compile Unity C# or create an APK.")
 nearby_source = (ROOT / "Assets/GalaxyExplorer/Scope/NearbyStarCatalog.cs").read_text(encoding="utf-8")
 deep_source = (ROOT / "Assets/GalaxyExplorer/Scope/DeepSpaceDestinationCatalog.cs").read_text(encoding="utf-8")
 runtime_source = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeRuntime.cs").read_text(encoding="utf-8")
-if "FindCompatibleShader" not in nearby_source or "foreach (Material material in starMaterials)" not in nearby_source:
+if "FindCompatibleShader" not in nearby_source or "starMaterials" not in nearby_source or "Destroy(material)" not in nearby_source:
     raise SystemExit("Nearby star catalog must use safe shader lookup and release owned materials.")
 if "Hidden/InternalErrorShader" not in deep_source or "Hidden/InternalErrorShader" not in runtime_source:
     raise SystemExit("Runtime catalogs must include a final shader fallback.")
