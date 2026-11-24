@@ -21,6 +21,9 @@ namespace GalaxyExplorer.Scope
         [SerializeField] private bool allowKeyboardFlight = true;
 
         private Vector3 focusPoint;
+        private Vector3 targetFocusPoint;
+        private float targetDistance = 34f;
+        private float focusTransitionSpeed = 3.2f;
         private float yaw;
         private float pitch = 24f;
         private float distance = 34f;
@@ -38,7 +41,9 @@ namespace GalaxyExplorer.Scope
             yaw = angles.y;
             pitch = angles.x;
             focusPoint = Vector3.zero;
+            targetFocusPoint = focusPoint;
             distance = Mathf.Clamp(Vector3.Distance(transform.position, focusPoint), minimumDistance, maximumDistance);
+            targetDistance = distance;
         }
 
         private void LateUpdate()
@@ -46,6 +51,10 @@ namespace GalaxyExplorer.Scope
             ReadMouse();
             ReadTouch();
             ReadKeyboardFlight();
+
+            float focusBlend = 1f - Mathf.Exp(-focusTransitionSpeed * Time.unscaledDeltaTime);
+            focusPoint = Vector3.Lerp(focusPoint, targetFocusPoint, focusBlend);
+            distance = Mathf.Lerp(distance, targetDistance, focusBlend);
 
             Quaternion orbitRotation = Quaternion.Euler(pitch, yaw, 0f);
             Vector3 desiredPosition = focusPoint + orbitRotation * new Vector3(0f, 0f, -distance);
@@ -85,7 +94,7 @@ namespace GalaxyExplorer.Scope
 
             float wheel = Input.mouseScrollDelta.y;
             if (Mathf.Abs(wheel) > 0.001f)
-                distance = Mathf.Clamp(distance * (1f - wheel * zoomSensitivity), minimumDistance, maximumDistance);
+                targetDistance = Mathf.Clamp(targetDistance * (1f - wheel * zoomSensitivity), minimumDistance, maximumDistance);
         }
 
         private void ReadTouch()
@@ -111,7 +120,7 @@ namespace GalaxyExplorer.Scope
                 if (lastPinchDistance > 0f)
                 {
                     float pinchDelta = currentDistance - lastPinchDistance;
-                    distance = Mathf.Clamp(distance * (1f - pinchDelta * 0.002f), minimumDistance, maximumDistance);
+                    targetDistance = Mathf.Clamp(targetDistance * (1f - pinchDelta * 0.002f), minimumDistance, maximumDistance);
                     Vector2 centerDelta = center - lastTwoFingerCenter;
                     Pan(centerDelta * (panSensitivity * Mathf.Max(distance, 2f) * 0.9f));
                 }
@@ -137,7 +146,9 @@ namespace GalaxyExplorer.Scope
             Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
             Vector3 movement = rotation * new Vector3(horizontal, altitude, vertical);
             if (movement.sqrMagnitude > 1f) movement.Normalize();
-            focusPoint += movement * speed * Time.unscaledDeltaTime;
+            Vector3 step = movement * speed * Time.unscaledDeltaTime;
+            focusPoint += step;
+            targetFocusPoint += step;
         }
 
         private void Pan(Vector2 delta)
@@ -145,26 +156,28 @@ namespace GalaxyExplorer.Scope
             Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
             Vector3 right = rotation * Vector3.right;
             Vector3 up = rotation * Vector3.up;
-            focusPoint += (-right * delta.x - up * delta.y);
+            Vector3 movement = -right * delta.x - up * delta.y;
+            focusPoint += movement;
+            targetFocusPoint += movement;
         }
 
         public void Focus(Transform target)
         {
             if (target == null) return;
-            focusPoint = target.position;
-            distance = Mathf.Clamp(Mathf.Max(1.5f, target.lossyScale.x * 3.5f), minimumDistance, maximumDistance);
+            targetFocusPoint = target.position;
+            targetDistance = Mathf.Clamp(Mathf.Max(1.5f, target.lossyScale.x * 3.5f), minimumDistance, maximumDistance);
         }
 
         public void FocusPoint(Vector3 point, float preferredDistance = 24f)
         {
-            focusPoint = point;
-            distance = Mathf.Clamp(preferredDistance, minimumDistance, maximumDistance);
+            targetFocusPoint = point;
+            targetDistance = Mathf.Clamp(preferredDistance, minimumDistance, maximumDistance);
         }
 
         public void FocusOrigin()
         {
-            focusPoint = Vector3.zero;
-            distance = 34f;
+            targetFocusPoint = Vector3.zero;
+            targetDistance = 34f;
             yaw = 0f;
             pitch = 24f;
         }
