@@ -19,7 +19,7 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         CreateLighting();
         CreateStars();
         CreatePlanets();
-        CreatePlayerShip();
+        CreateFreeExplorationCamera();
     }
 
     private static Material MakeMaterial(Color color, float metallic = 0f, float smoothness = 0.35f)
@@ -174,43 +174,31 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         }
     }
 
-    private void CreatePlayerShip()
+    private void CreateFreeExplorationCamera()
     {
-        var ship = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        ship.name = "Player Exploration Ship";
-        ship.transform.SetParent(transform, false);
-        ship.transform.position = new Vector3(0f, 0f, -18f);
-        ship.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-        ship.transform.localScale = new Vector3(1.5f, 2.6f, 1.5f);
-        ship.GetComponent<Renderer>().sharedMaterial = MakeMaterial(new Color(0.72f, 0.82f, 0.95f), 0.72f, 0.8f);
-        BuildShipModel(ship.transform);
-        var body = ship.AddComponent<Rigidbody>();
-        body.mass = 8f;
-        body.useGravity = false;
-        body.drag = 0.25f;
-        body.angularDrag = 2f;
-        body.interpolation = RigidbodyInterpolation.Interpolate;
-        ship.AddComponent<SpacecraftFlightController>();
-        ship.AddComponent<ProceduralSpaceAudio>();
-
         Camera camera = Camera.main;
         GameObject cameraObject;
+
         if (camera == null)
         {
-            cameraObject = new GameObject("Exploration Camera");
+            cameraObject = new GameObject("Free Exploration Camera");
             cameraObject.tag = "MainCamera";
             camera = cameraObject.AddComponent<Camera>();
             cameraObject.AddComponent<AudioListener>();
         }
-        else cameraObject = camera.gameObject;
+        else
+        {
+            cameraObject = camera.gameObject;
+        }
 
         camera.fieldOfView = 68f;
         camera.nearClipPlane = 0.08f;
-        camera.farClipPlane = 1200f;
-        var follow = cameraObject.GetComponent<SpacecraftFollowCamera>();
-        if (follow == null) follow = cameraObject.AddComponent<SpacecraftFollowCamera>();
-        follow.target = ship.transform;
-        follow.offset = new Vector3(0f, 5.5f, -13f);
+        camera.farClipPlane = 1600f;
+
+        if (cameraObject.GetComponent<GalaxyExplorer.Scope.SolarSystemScopeCamera>() == null)
+            cameraObject.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeCamera>();
+        if (cameraObject.GetComponent<GalaxyExplorer.Scope.GalaxyExplorerVRSupport>() == null)
+            cameraObject.AddComponent<GalaxyExplorer.Scope.GalaxyExplorerVRSupport>();
 
         if (FindObjectOfType<SpaceHUD>() == null)
             new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
@@ -218,30 +206,5 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
             new GameObject("Galaxy Explorer Menu").AddComponent<SpaceGameMenu>();
         if (FindObjectOfType<NASAImageGallery>() == null)
             new GameObject("NASA Image Gallery").AddComponent<NASAImageGallery>();
-    }
-
-    private void BuildShipModel(Transform root)
-    {
-        Material wingMaterial = MakeMaterial(new Color(0.16f, 0.24f, 0.38f), 0.8f, 0.72f);
-        Material glassMaterial = MakeMaterial(new Color(0.12f, 0.62f, 0.88f), 0.35f, 0.9f);
-        Material engineMaterial = MakeMaterial(new Color(0.12f, 0.42f, 1f), 0.15f, 0.8f);
-
-        CreateShipPart(root, "Left Wing", PrimitiveType.Cube, new Vector3(-1.25f, 0f, -0.15f), new Vector3(1.7f, 0.16f, 1.5f), wingMaterial);
-        CreateShipPart(root, "Right Wing", PrimitiveType.Cube, new Vector3(1.25f, 0f, -0.15f), new Vector3(1.7f, 0.16f, 1.5f), wingMaterial);
-        CreateShipPart(root, "Cockpit", PrimitiveType.Sphere, new Vector3(0f, 0.48f, 1.05f), new Vector3(0.72f, 0.52f, 1.15f), glassMaterial);
-        CreateShipPart(root, "Left Engine", PrimitiveType.Sphere, new Vector3(-0.48f, 0f, -2.15f), Vector3.one * 0.42f, engineMaterial);
-        CreateShipPart(root, "Right Engine", PrimitiveType.Sphere, new Vector3(0.48f, 0f, -2.15f), Vector3.one * 0.42f, engineMaterial);
-    }
-
-    private static void CreateShipPart(Transform parent, string partName, PrimitiveType type, Vector3 localPosition, Vector3 localScale, Material material)
-    {
-        var part = GameObject.CreatePrimitive(type);
-        part.name = partName;
-        part.transform.SetParent(parent, false);
-        part.transform.localPosition = localPosition;
-        part.transform.localScale = localScale;
-        part.GetComponent<Renderer>().sharedMaterial = material;
-        var collider = part.GetComponent<Collider>();
-        if (collider != null) Object.Destroy(collider);
     }
 }
