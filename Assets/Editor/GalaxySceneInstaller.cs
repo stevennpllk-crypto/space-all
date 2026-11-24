@@ -31,6 +31,19 @@ public static class GalaxySceneInstaller
             GameObject defaultLight = GameObject.Find("Directional Light");
             if (defaultLight != null) Object.DestroyImmediate(defaultLight);
 
+            // The default Unity camera starts almost level with the orbital plane.
+            // Give the Scope runtime a useful elevated overview before its camera
+            // controller captures the initial orbit state in Awake.
+            Camera starterCamera = Camera.main;
+            if (starterCamera != null)
+            {
+                starterCamera.transform.position = new Vector3(0f, 16f, -34f);
+                starterCamera.transform.LookAt(Vector3.zero);
+                starterCamera.fieldOfView = 60f;
+                starterCamera.nearClipPlane = 0.1f;
+                starterCamera.farClipPlane = 600f;
+            }
+
             // Start the real eight-planet Solar System Scope runtime.
             // GalaxyWorldBootstrap remains a fallback for scenes without this component.
             var scopeRoot = new GameObject("Solar System Scope Runtime");
