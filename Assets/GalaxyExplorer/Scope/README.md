@@ -26,3 +26,11 @@ The camera and selection scripts use Unity's legacy `Input` API for broad compat
 
 ## Status
 Source files are committed, but this prototype has not yet been compiled or run in the Unity Editor. An APK must not be considered available until the Unity Android workflow completes successfully.
+
+## Atmosphere and cloud effects
+
+`PlanetAtmosphereEffects` adds transparent outer shells to the terrestrial planets and ice/gas giants, plus slowly rotating stylized cloud shells for Earth, Venus, Jupiter and Saturn. The effect is intentionally lightweight and procedural; it is not a physically based Rayleigh/Mie scattering implementation and does not use photographic texture maps. The runtime attaches this component automatically after creating the planets.
+
+## Natural satellites
+
+`NaturalSatelliteSystem` adds the Moon, Phobos, Deimos, the four Galilean moons, and Titan. Orbital periods are approximate sidereal values; orbit radii and rendered sizes are compressed for legibility and are not to scale.
