@@ -75,6 +75,18 @@ if scope_runtime.count('new BodyDefinition("') != 8:
     raise SystemExit("Solar System Scope runtime must define all eight planets.")
 print("Solar System Scope documentation and planet catalog checks passed.")
 
+# Saturn's ring system must have one owner and tolerate shader lookup failure.
+ring_source = (ROOT / "Assets/GalaxyExplorer/Scope/PlanetaryRingSystem.cs").read_text(encoding="utf-8")
+if "if (shader == null) shader = Shader.Find(\"Hidden/InternalErrorShader\");" not in ring_source:
+    raise SystemExit("Saturn ring material must provide a final shader fallback.")
+if "if (shader == null)" not in ring_source or "Destroy(texture);" not in ring_source:
+    raise SystemExit("Saturn ring material creation must safely handle unavailable shaders.")
+if "if (material == null)" not in ring_source:
+    raise SystemExit("Saturn ring renderer must handle failed material creation.")
+if "CreateSaturnRings(planet.transform" in runtime_source:
+    raise SystemExit("Saturn rings must be generated only by PlanetaryRingSystem, not duplicated by the base runtime.")
+print("Saturn ring uniqueness and shader-fallback checks passed.")
+
 # Ensure the generated starter scene launches the actual Solar System Scope runtime.
 scene_installer = (ROOT / "Assets/Editor/GalaxySceneInstaller.cs").read_text(encoding="utf-8")
 if 'scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();' not in scene_installer:
