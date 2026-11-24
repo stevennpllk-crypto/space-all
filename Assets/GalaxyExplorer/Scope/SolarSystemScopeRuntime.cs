@@ -283,6 +283,7 @@ namespace GalaxyExplorer.Scope
             if (starShader != null)
             {
                 starMaterial = new Material(starShader);
+                ownedMaterials.Add(starMaterial);
                 renderer.sharedMaterial = starMaterial;
             }
         }
