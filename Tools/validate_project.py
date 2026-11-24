@@ -70,6 +70,18 @@ if "if (shader == null) return null;" not in runtime_source:
     raise SystemExit("Runtime material factory must handle missing shaders safely.")
 print("Runtime material safety checks passed.")
 
+# Guard against selecting planets through the on-screen IMGUI panels.
+if "IsPointerOverGui(Vector2 screenPosition)" not in runtime_source:
+    raise SystemExit("Runtime selection must use screen-position based UI hit testing.")
+if "Input.GetMouseButtonDown(0) && !IsPointerOverGui(Input.mousePosition)" not in runtime_source:
+    raise SystemExit("Mouse selection must ignore clicks on the exploration UI.")
+if "if (!IsPointerOverGui(touchPosition))" not in runtime_source:
+    raise SystemExit("Touch selection must ignore taps on the exploration UI.")
+if "Event.current != null && Event.current.type == EventType.Used" in runtime_source:
+    raise SystemExit("Do not inspect Event.current from Update; it is not a reliable IMGUI hit test.")
+print("Exploration UI input guards passed.")
+
+
 with (ROOT / "Assets/Art/NASA/NASA_ASSET_CREDITS.json").open(encoding="utf-8") as handle:
     nasa_manifest = json.load(handle)
 if len(nasa_manifest.get("assets", [])) < 7:
