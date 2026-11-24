@@ -38,3 +38,7 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Procedural planet surface maps
 
 `PlanetSurfaceTextures` generates deterministic 256×128 color maps at runtime for the eight planets. It uses layered Perlin noise, stylized terrestrial color regions, polar caps on Earth, and banding on the giant planets. The maps are illustrative visual material only: they are not measured satellite imagery, scientifically validated geology, or height/displacement maps. Texture resolution can be adjusted in the component Inspector; the default is intended to keep mobile memory use modest.
+
+## Saturn ring system
+
+`PlanetaryRingSystem` adds a generated annulus mesh around Saturn, with a low-resolution radial band texture, a stylized Cassini-like gap, adjustable opacity, and an Inspector-controlled ring-plane tilt. The ring geometry is intentionally lightweight for mobile rendering. Its dimensions, band structure, and opacity are illustrative and are not a physically accurate particle simulation.
