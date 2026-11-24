@@ -131,6 +131,10 @@ namespace GalaxyExplorer.Scope
             if (GetComponent<NaturalSatelliteSystem>() == null)
                 gameObject.AddComponent<NaturalSatelliteSystem>();
 
+            // Add subtle atmosphere and cloud shells after all planetary meshes exist.
+            if (GetComponent<PlanetAtmosphereEffects>() == null)
+                gameObject.AddComponent<PlanetAtmosphereEffects>();
+
             if (Camera.main == null)
             {
                 GameObject cameraObject = new GameObject("Scope Camera");
