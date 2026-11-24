@@ -135,6 +135,10 @@ namespace GalaxyExplorer.Scope
             if (GetComponent<PlanetAtmosphereEffects>() == null)
                 gameObject.AddComponent<PlanetAtmosphereEffects>();
 
+            // Generate deterministic, lightweight surface color maps for each planet.
+            if (GetComponent<PlanetSurfaceTextures>() == null)
+                gameObject.AddComponent<PlanetSurfaceTextures>();
+
             if (Camera.main == null)
             {
                 GameObject cameraObject = new GameObject("Scope Camera");
