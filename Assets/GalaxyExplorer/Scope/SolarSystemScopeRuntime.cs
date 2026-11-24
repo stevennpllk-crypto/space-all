@@ -51,6 +51,8 @@ namespace GalaxyExplorer.Scope
         private BodyView selected;
         private Material lineMaterial;
         private Material starMaterial;
+        private Mesh starfieldMesh;
+        private readonly List<Material> ownedMaterials = new List<Material>();
         private bool paused;
         private GUIStyle titleStyle;
         private GUIStyle bodyStyle;
@@ -201,7 +203,7 @@ namespace GalaxyExplorer.Scope
                 material.EnableKeyword("_EMISSION");
                 material.SetColor("_EmissionColor", new Color(1f, 0.38f, 0.04f) * 2.5f);
             }
-            if (renderer != null && material != null) renderer.material = material;
+            if (renderer != null && material != null) renderer.sharedMaterial = material;
             Destroy(sun.GetComponent<Collider>());
             AddLabel(sun.transform, "SUN", 2.0f);
         }
@@ -216,7 +218,7 @@ namespace GalaxyExplorer.Scope
             planet.transform.position = new Vector3(definition.orbitRadius * DistanceScale, 0f, 0f);
             Material planetMaterial = NewMaterial(definition.color);
             Renderer planetRenderer = planet.GetComponent<Renderer>();
-            if (planetRenderer != null && planetMaterial != null) planetRenderer.material = planetMaterial;
+            if (planetRenderer != null && planetMaterial != null) planetRenderer.sharedMaterial = planetMaterial;
 
             BodyView view = new BodyView { data = definition, transform = planet.transform };
             if (showOrbitPaths)
@@ -268,6 +270,7 @@ namespace GalaxyExplorer.Scope
             UnityEngine.Random.state = oldState;
             mesh.vertices = vertices;
             mesh.colors = colors;
+            starfieldMesh = mesh;
             int[] indices = new int[count];
             for (int i = 0; i < count; i++) indices[i] = i;
             mesh.SetIndices(indices, MeshTopology.Points, 0);
@@ -306,6 +309,7 @@ namespace GalaxyExplorer.Scope
             if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
             if (shader == null) return null;
             Material material = new Material(shader);
+            ownedMaterials.Add(material);
             if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
             if (material.HasProperty("_Color")) material.SetColor("_Color", color);
             return material;
@@ -318,7 +322,11 @@ namespace GalaxyExplorer.Scope
                 Shader shader = Shader.Find("Sprites/Default");
                 if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
                 if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
-                if (shader != null) lineMaterial = new Material(shader);
+                if (shader != null)
+                {
+                    lineMaterial = new Material(shader);
+                    ownedMaterials.Add(lineMaterial);
+                }
             }
             return lineMaterial;
         }
@@ -424,8 +432,12 @@ namespace GalaxyExplorer.Scope
 
         private void OnDestroy()
         {
-            if (lineMaterial != null) Destroy(lineMaterial);
-            if (starMaterial != null) Destroy(starMaterial);
+            // All runtime-created materials and meshes are explicitly owned here.
+            foreach (Material material in ownedMaterials)
+                if (material != null) Destroy(material);
+            ownedMaterials.Clear();
+
+            if (starfieldMesh != null) Destroy(starfieldMesh);
         }
     }
 }
