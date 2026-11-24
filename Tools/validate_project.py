@@ -62,7 +62,7 @@ print("Note: this check does not compile Unity C# or create an APK.")
 bootstrap_source = (ROOT / "Assets/Scripts/GalaxyExplorer/GalaxyWorldBootstrap.cs").read_text(encoding="utf-8")
 if "GalaxyExplorer.Scope.SolarSystemScopeCamera" in bootstrap_source or "GalaxyExplorer.Scope.GalaxyExplorerVRSupport" in bootstrap_source:
     raise SystemExit("GalaxyExplorer.Runtime asmdef must not reference Scope scripts in Assembly-CSharp.")
-if "GalaxyExplorer.Scope.SolarSystemScopeRuntime" in bootstrap_source:
+if "typeof(GalaxyExplorer.Scope." in bootstrap_source or "AddComponent<GalaxyExplorer.Scope." in bootstrap_source or "GetComponent<GalaxyExplorer.Scope." in bootstrap_source:
     raise SystemExit("Runtime bootstrap must detect the Scope runtime without a compile-time assembly reference.")
 print("Unity assembly-boundary checks passed.")
 
