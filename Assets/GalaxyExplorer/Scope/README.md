@@ -42,3 +42,7 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Saturn ring system
 
 `PlanetaryRingSystem` adds a generated annulus mesh around Saturn, with a low-resolution radial band texture, a stylized Cassini-like gap, adjustable opacity, and an Inspector-controlled ring-plane tilt. The ring geometry is intentionally lightweight for mobile rendering. Its dimensions, band structure, and opacity are illustrative and are not a physically accurate particle simulation.
+
+## Deep-space nebula backdrop
+
+`DeepSpaceNebulaBackdrop` creates a low-opacity, procedural violet/blue nebula texture on a large transparent sphere surrounding the scene. The texture is generated once at startup using layered Perlin noise and uses a modest 512×256 default resolution. The effect is illustrative rather than a real astronomical image or volumetric gas simulation. `maximumOpacity` and texture dimensions can be adjusted in the Inspector; keep opacity conservative so the starfield and planet silhouettes remain readable on mobile devices.
