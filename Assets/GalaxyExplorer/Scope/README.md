@@ -51,3 +51,8 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Procedural Milky Way backdrop
 
 `ProceduralGalaxyBackdrop` creates a stylized spiral galaxy from one point mesh (9,000 stars by default), with a denser central bulge, four loose spiral arms, deterministic placement, and configurable radius, tilt, thickness, and visibility. It avoids creating one GameObject per star and is intended to keep CPU and scene-object overhead low on mobile. The point rendering appearance depends on the active Unity render pipeline and graphics device, so it still requires an in-Editor/device visual check. This is an artistic procedural distribution, not an astronomically measured Milky Way map.
+
+
+## Nearby star destinations
+
+`NearbyStarCatalog` adds five selectable educational destinations: Sirius, Proxima Centauri, Alpha Centauri A, Vega, and Betelgeuse. Selecting a catalog entry focuses the scope camera on its star and displays a short spectral classification and fact. Their scene positions and rendered radii are deliberately illustrative so the destinations can be explored in this compressed prototype; they are not a 3D astrometric map and must not be interpreted as true interstellar navigation coordinates. The catalog creates only five star objects and does not create a large per-star object hierarchy.
