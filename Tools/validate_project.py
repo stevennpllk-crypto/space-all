@@ -94,6 +94,18 @@ if "IsPointerOverUi(first.position) || IsPointerOverUi(second.position)" not in 
     raise SystemExit("Pinch gestures must ignore touches that begin on exploration UI panels.")
 print("Camera gesture UI guards passed.")
 
+satellite_source = (ROOT / "Assets/GalaxyExplorer/Scope/NaturalSatelliteSystem.cs").read_text(encoding="utf-8")
+if "if (shader == null) return null;" not in satellite_source:
+    raise SystemExit("Satellite material creation must handle missing shaders.")
+if "if (orbitMaterial == null)" not in satellite_source:
+    raise SystemExit("Satellite orbit rendering must handle missing shaders.")
+if "satelliteMaterials.Add(moonMaterial)" not in satellite_source or "Destroy(material)" not in satellite_source:
+    raise SystemExit("Per-moon materials must be tracked and released.")
+if "moonRenderer.sharedMaterial = moonMaterial;" not in satellite_source:
+    raise SystemExit("Satellite materials must avoid implicit Renderer.material cloning.")
+print("Natural satellite material lifecycle checks passed.")
+
+
 
 
 
