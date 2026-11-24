@@ -34,3 +34,7 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Natural satellites
 
 `NaturalSatelliteSystem` adds the Moon, Phobos, Deimos, the four Galilean moons, and Titan. Orbital periods are approximate sidereal values; orbit radii and rendered sizes are compressed for legibility and are not to scale.
+
+## Procedural planet surface maps
+
+`PlanetSurfaceTextures` generates deterministic 256×128 color maps at runtime for the eight planets. It uses layered Perlin noise, stylized terrestrial color regions, polar caps on Earth, and banding on the giant planets. The maps are illustrative visual material only: they are not measured satellite imagery, scientifically validated geology, or height/displacement maps. Texture resolution can be adjusted in the component Inspector; the default is intended to keep mobile memory use modest.
