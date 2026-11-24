@@ -73,16 +73,20 @@ namespace GalaxyExplorer.Scope
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
             if (shader == null) shader = Shader.Find("Sprites/Default");
-            Material material = new Material(shader);
-            material.name = entry.name + " Marker Material";
-            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", entry.color);
-            if (material.HasProperty("_Color")) material.SetColor("_Color", entry.color);
-            if (material.HasProperty("_EmissionColor"))
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+            if (renderer != null && shader != null)
             {
-                material.EnableKeyword("_EMISSION");
-                material.SetColor("_EmissionColor", entry.color * 1.4f);
+                Material material = new Material(shader);
+                material.name = entry.name + " Marker Material";
+                if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", entry.color);
+                if (material.HasProperty("_Color")) material.SetColor("_Color", entry.color);
+                if (material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", entry.color * 1.4f);
+                }
+                renderer.sharedMaterial = material;
             }
-            renderer.sharedMaterial = material;
 
             Collider collider = marker.GetComponent<Collider>();
             if (collider != null) Destroy(collider);
