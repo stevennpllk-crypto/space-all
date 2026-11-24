@@ -56,3 +56,17 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Nearby star destinations
 
 `NearbyStarCatalog` adds five selectable educational destinations: Sirius, Proxima Centauri, Alpha Centauri A, Vega, and Betelgeuse. Selecting a catalog entry focuses the scope camera on its star and displays a short spectral classification and fact. Their scene positions and rendered radii are deliberately illustrative so the destinations can be explored in this compressed prototype; they are not a 3D astrometric map and must not be interpreted as true interstellar navigation coordinates. The catalog creates only five star objects and does not create a large per-star object hierarchy.
+
+
+## Free-flight exploration controls
+
+The scope camera is a free exploration camera; there is no spacecraft or vehicle required.
+- Desktop: left mouse drag orbits the view, right/middle drag pans through space, mouse wheel zooms, WASD moves through the scene, Q/E moves vertically, and Shift increases flight speed.
+- Touch: one finger orbits, two-finger pinch zooms, and two-finger movement pans the view.
+- Selecting a planet, moon, or catalog destination focuses the camera on that object. The focus transition is smoothed by the camera controller.
+
+The scene uses compressed distances. Free-flight movement is a navigation aid, not a physical spacecraft simulation.
+
+## Optional VR mode
+
+`GalaxyExplorerVRSupport` exposes VR runtime status and configures the camera for both eyes. Head pose is read from Unity XR when an XR runtime is active. A working headset experience still requires an OpenXR-compatible XR Plug-in Management loader and the correct provider settings for the target headset; this repository does not claim headset validation. The standard non-VR camera controls remain available when XR is inactive. Test comfort, frame rate, and controller interaction on the actual target headset before release.
