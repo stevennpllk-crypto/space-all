@@ -81,6 +81,11 @@ if "Event.current != null && Event.current.type == EventType.Used" in runtime_so
     raise SystemExit("Do not inspect Event.current from Update; it is not a reliable IMGUI hit test.")
 print("Exploration UI input guards passed.")
 
+if "Matrix4x4 previousMatrix = GUI.matrix;" not in runtime_source or "GUI.matrix = previousMatrix;" not in runtime_source:
+    raise SystemExit("Scope HUD must restore the shared IMGUI matrix after drawing.")
+print("IMGUI state restoration checks passed.")
+
+
 
 with (ROOT / "Assets/Art/NASA/NASA_ASSET_CREDITS.json").open(encoding="utf-8") as handle:
     nasa_manifest = json.load(handle)
