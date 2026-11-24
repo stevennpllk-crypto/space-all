@@ -402,6 +402,7 @@ namespace GalaxyExplorer.Scope
         private void OnGUI()
         {
             EnsureStyles();
+            Matrix4x4 previousMatrix = GUI.matrix;
             float scale = Mathf.Clamp(Screen.width / 1100f, 0.72f, 1.15f);
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
 
@@ -427,6 +428,10 @@ namespace GalaxyExplorer.Scope
 
             GUI.Label(new Rect(20, Screen.height / scale - 38, 520, 24),
                 "Drag: orbit  •  Right drag: pan  •  WASD: fly  •  Wheel / pinch: zoom", smallStyle);
+
+            // IMGUI state is shared by OnGUI callbacks; restore the caller's matrix
+            // so other catalogs are not unintentionally scaled or offset.
+            GUI.matrix = previousMatrix;
         }
 
         private void EnsureStyles()
