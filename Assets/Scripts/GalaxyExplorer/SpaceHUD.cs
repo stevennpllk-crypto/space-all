@@ -1,66 +1,40 @@
 using UnityEngine;
 
-/// <summary>Runtime HUD showing ship speed, discoveries, and camera mode controls.</summary>
+/// <summary>Navigation HUD for free-flight exploration without a vehicle.</summary>
 public sealed class SpaceHUD : MonoBehaviour
 {
     private GUIStyle labelStyle;
     private GUIStyle titleStyle;
 
-    private void Awake()
-    {
-        var ship = GameObject.Find("Player Exploration Ship");
-        if (ship != null && ship.GetComponent<SpaceHUDMarker>() == null)
-            ship.AddComponent<SpaceHUDMarker>();
-    }
-
     private void OnGUI()
     {
         if (labelStyle == null)
         {
-            labelStyle = new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(16, Screen.height / 42), normal = { textColor = Color.white } };
-            titleStyle = new GUIStyle(labelStyle) { fontSize = Mathf.Max(20, Screen.height / 32), fontStyle = FontStyle.Bold };
+            labelStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = Mathf.Max(14, Screen.height / 54),
+                normal = { textColor = Color.white }
+            };
+            titleStyle = new GUIStyle(labelStyle)
+            {
+                fontSize = Mathf.Max(19, Screen.height / 34),
+                fontStyle = FontStyle.Bold
+            };
         }
 
         GUI.color = new Color(0.02f, 0.05f, 0.12f, 0.72f);
-        GUI.Box(new Rect(18, 18, 300, 112), GUIContent.none);
+        GUI.Box(new Rect(18, 18, 330, 112), GUIContent.none);
         GUI.color = Color.white;
-        GUI.Label(new Rect(32, 26, 270, 32), "GALAXY EXPLORER", titleStyle);
-        Rigidbody shipBody = FindShipBody();
-        float speed = shipBody != null ? shipBody.velocity.magnitude : 0f;
-        GUI.Label(new Rect(32, 64, 270, 26), "SPEED  " + speed.ToString("0.0") + " m/s", labelStyle);
-        GUI.Label(new Rect(32, 92, 270, 26), "WORLDS  " + DiscoveryLog.GetDiscoveredNames().Count, labelStyle);
-
-        SpacecraftFollowCamera cameraRig = FindObjectOfType<SpacecraftFollowCamera>();
-        if (cameraRig != null)
-        {
-            float buttonWidth = Application.isMobilePlatform ? 190f : 210f;
-            Rect viewButton = new Rect(Screen.width - buttonWidth - 20f, 18f, buttonWidth, 48f);
-            if (GUI.Button(viewButton, cameraRig.FirstPerson ? "VIEW: COCKPIT  |  SWITCH" : "VIEW: CHASE  |  SWITCH"))
-                cameraRig.ToggleView();
-        }
+        GUI.Label(new Rect(32, 26, 300, 32), "GALAXY EXPLORER", titleStyle);
+        GUI.Label(new Rect(32, 64, 300, 24), "FREE EXPLORATION  •  NO SPACECRAFT", labelStyle);
+        GUI.Label(new Rect(32, 92, 300, 24), "Explore planets, moons and deep space", labelStyle);
 
         if (Application.isMobilePlatform)
         {
-            GUI.color = new Color(0.1f, 0.45f, 0.9f, 0.42f);
-            GUI.Box(new Rect(24, Screen.height - 168, 144, 144), "STEER");
-            GUI.Box(new Rect(Screen.width - 168, Screen.height - 168, 144, 144), "LOOK");
+            GUI.color = new Color(0.1f, 0.45f, 0.9f, 0.36f);
+            GUI.Box(new Rect(20, Screen.height - 116, 150, 88), "DRAG: ORBIT");
+            GUI.Box(new Rect(Screen.width - 170, Screen.height - 116, 150, 88), "TWO FINGERS: PAN / ZOOM");
             GUI.color = Color.white;
         }
-    }
-
-    private static Rigidbody FindShipBody()
-    {
-        GameObject ship = GameObject.Find("Player Exploration Ship");
-        return ship != null ? ship.GetComponent<Rigidbody>() : null;
-    }
-}
-
-/// <summary>Marker prevents duplicate HUD creation.</summary>
-public sealed class SpaceHUDMarker : MonoBehaviour
-{
-    private void Awake()
-    {
-        if (FindObjectOfType<SpaceHUD>() == null)
-            new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
     }
 }
