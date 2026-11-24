@@ -9,7 +9,7 @@ GitHub Actions cannot compile this Unity project until a valid Unity license is 
 For a Unity Personal license, use the current GameCI activation guidance:
 
 1. On a computer with Unity Hub installed, sign in to the Unity account that owns the project.
-2. In Unity Hub, open **Preferences → Licenses → Add** and complete the **Get a free Personal license** flow.
+2. In Unity Hub, open **Settings → Licenses → Add** and select **Get a free personal license**, then agree to the terms and complete activation.
 3. Confirm that Unity Hub has actually created the license file (`.ulf`). Typical locations are:
    - Windows: `C:\\ProgramData\\Unity\\Unity_lic.ulf`
    - macOS: `/Library/Application Support/Unity/Unity_lic.ulf`
