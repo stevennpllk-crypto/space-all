@@ -41,6 +41,14 @@ namespace GalaxyExplorer.Scope
             filter.sharedMesh = mesh;
 
             Material material = BuildRingMaterial();
+            if (material == null)
+            {
+                Destroy(mesh);
+                ownedMeshes.Remove(mesh);
+                Destroy(ringObject);
+                return;
+            }
+
             ownedMaterials.Add(material);
             MeshRenderer renderer = ringObject.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
@@ -129,6 +137,13 @@ namespace GalaxyExplorer.Scope
 
             Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
             if (shader == null) shader = Shader.Find("Sprites/Default");
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+            if (shader == null)
+            {
+                Destroy(texture);
+                return null;
+            }
+
             Material material = new Material(shader);
             if (material.HasProperty("_BaseMap")) material.SetTexture("_BaseMap", texture);
             if (material.HasProperty("_MainTex")) material.SetTexture("_MainTex", texture);
