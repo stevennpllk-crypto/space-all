@@ -11,6 +11,7 @@ required = [
     "Assets/GalaxyExplorer/Scope/SolarSystemScopeRuntime.cs",
     "Assets/GalaxyExplorer/Scope/SolarSystemScopeCamera.cs",
     "Assets/GalaxyExplorer/Scope/GalaxyExplorerVRSupport.cs",
+    "Assets/GalaxyExplorer/Scope/DeepSpaceDestinationCatalog.cs",
     "Assets/Scripts/GalaxyExplorer/PlanetDiscovery.cs",
     "Assets/Scripts/GalaxyExplorer/DiscoveryLog.cs",
     "Assets/Scripts/GalaxyExplorer/SpaceHUD.cs",
