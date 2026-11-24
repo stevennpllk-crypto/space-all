@@ -31,8 +31,10 @@ public static class GalaxySceneInstaller
             GameObject defaultLight = GameObject.Find("Directional Light");
             if (defaultLight != null) Object.DestroyImmediate(defaultLight);
 
-            var bootstrap = new GameObject("Galaxy Explorer Bootstrap");
-            bootstrap.AddComponent<GalaxyWorldBootstrap>();
+            // Start the real eight-planet Solar System Scope runtime.
+            // GalaxyWorldBootstrap remains a fallback for scenes without this component.
+            var scopeRoot = new GameObject("Solar System Scope Runtime");
+            scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorSceneManager.CloseScene(scene, true);
             AssetDatabase.Refresh();
