@@ -29,8 +29,9 @@ namespace GalaxyExplorer.Scope
                 Texture2D map = BuildMap(bodyName);
                 ownedTextures.Add(map);
 
-                // Accessing renderer.material creates a per-planet instance.
-                Material material = renderer.material;
+                // The scope runtime creates one unique material per planet and owns its lifetime.
+                // Use sharedMaterial to avoid silently cloning another material instance.
+                Material material = renderer.sharedMaterial;
                 if (material.HasProperty("_BaseMap")) material.SetTexture("_BaseMap", map);
                 if (material.HasProperty("_MainTex")) material.SetTexture("_MainTex", map);
                 material.mainTexture = map;
