@@ -12,6 +12,7 @@ required = [
     "Assets/GalaxyExplorer/Scope/SolarSystemScopeCamera.cs",
     "Assets/GalaxyExplorer/Scope/GalaxyExplorerVRSupport.cs",
     "Assets/GalaxyExplorer/Scope/DeepSpaceDestinationCatalog.cs",
+    "Assets/GalaxyExplorer/Scope/NearbyStarCatalog.cs",
     "Assets/Scripts/GalaxyExplorer/PlanetDiscovery.cs",
     "Assets/Scripts/GalaxyExplorer/DiscoveryLog.cs",
     "Assets/Scripts/GalaxyExplorer/SpaceHUD.cs",
@@ -56,6 +57,18 @@ if "m_EditorVersion: 6000." not in version:
 
 print("Source validation passed: required files and JSON configuration are present.")
 print("Note: this check does not compile Unity C# or create an APK.")
+
+# Guard against regressions in runtime material creation and ownership.
+nearby_source = (ROOT / "Assets/GalaxyExplorer/Scope/NearbyStarCatalog.cs").read_text(encoding="utf-8")
+deep_source = (ROOT / "Assets/GalaxyExplorer/Scope/DeepSpaceDestinationCatalog.cs").read_text(encoding="utf-8")
+runtime_source = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeRuntime.cs").read_text(encoding="utf-8")
+if "FindCompatibleShader" not in nearby_source or "foreach (Material material in starMaterials)" not in nearby_source:
+    raise SystemExit("Nearby star catalog must use safe shader lookup and release owned materials.")
+if "Hidden/InternalErrorShader" not in deep_source or "Hidden/InternalErrorShader" not in runtime_source:
+    raise SystemExit("Runtime catalogs must include a final shader fallback.")
+if "if (shader == null) return null;" not in runtime_source:
+    raise SystemExit("Runtime material factory must handle missing shaders safely.")
+print("Runtime material safety checks passed.")
 
 with (ROOT / "Assets/Art/NASA/NASA_ASSET_CREDITS.json").open(encoding="utf-8") as handle:
     nasa_manifest = json.load(handle)
