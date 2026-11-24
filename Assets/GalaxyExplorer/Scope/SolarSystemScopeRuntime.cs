@@ -162,6 +162,8 @@ namespace GalaxyExplorer.Scope
             Camera camera = Camera.main;
             if (camera != null && camera.GetComponent<SolarSystemScopeCamera>() == null)
                 camera.gameObject.AddComponent<SolarSystemScopeCamera>();
+            if (camera != null && camera.GetComponent<GalaxyExplorerVRSupport>() == null)
+                camera.gameObject.AddComponent<GalaxyExplorerVRSupport>();
 
             selected = bodies.Count > 2 ? bodies[2] : null;
         }
@@ -379,7 +381,7 @@ namespace GalaxyExplorer.Scope
                 simulationSpeed = 1f;
 
             GUI.Label(new Rect(20, Screen.height / scale - 38, 520, 24),
-                "Drag to orbit  •  Scroll / pinch to zoom  •  Select a planet for facts", smallStyle);
+                "Drag: orbit  •  Right drag: pan  •  WASD: fly  •  Wheel / pinch: zoom", smallStyle);
         }
 
         private void EnsureStyles()
