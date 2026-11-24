@@ -56,13 +56,18 @@ namespace GalaxyExplorer.Scope
         [SerializeField, Min(0f)] private float simulationSpeed = 1f;
 
         private readonly List<SatelliteView> views = new List<SatelliteView>();
+        private readonly List<Material> satelliteMaterials = new List<Material>();
         private Material satelliteMaterial;
         private Material orbitMaterial;
 
         private void Start()
         {
             satelliteMaterial = CreateMaterial();
-            orbitMaterial = new Material(Shader.Find("Sprites/Default"));
+
+            Shader orbitShader = Shader.Find("Sprites/Default");
+            if (orbitShader == null) orbitShader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (orbitShader == null) orbitShader = Shader.Find("Hidden/InternalErrorShader");
+            if (orbitShader != null) orbitMaterial = new Material(orbitShader);
 
             foreach (Satellite data in Catalog)
             {
@@ -81,8 +86,15 @@ namespace GalaxyExplorer.Scope
                 float visualRadius = Mathf.Max(0.035f, data.radius * 0.42f);
                 moon.transform.localScale = Vector3.one * visualRadius * 2f;
                 moon.transform.localPosition = Vector3.right * data.orbit;
-                moon.GetComponent<Renderer>().material = new Material(satelliteMaterial);
-                moon.GetComponent<Renderer>().material.color = data.color;
+                Renderer moonRenderer = moon.GetComponent<Renderer>();
+                if (moonRenderer != null && satelliteMaterial != null)
+                {
+                    Material moonMaterial = new Material(satelliteMaterial);
+                    if (moonMaterial.HasProperty("_BaseColor")) moonMaterial.SetColor("_BaseColor", data.color);
+                    if (moonMaterial.HasProperty("_Color")) moonMaterial.SetColor("_Color", data.color);
+                    moonRenderer.sharedMaterial = moonMaterial;
+                    satelliteMaterials.Add(moonMaterial);
+                }
                 Collider collider = moon.GetComponent<Collider>();
                 if (collider != null) Destroy(collider);
 
@@ -120,7 +132,12 @@ namespace GalaxyExplorer.Scope
             line.loop = true;
             line.positionCount = 96;
             line.widthMultiplier = 0.012f;
-            line.material = orbitMaterial;
+            if (orbitMaterial == null)
+            {
+                Destroy(orbitObject);
+                return;
+            }
+            line.sharedMaterial = orbitMaterial;
             line.startColor = new Color(0.52f, 0.66f, 0.84f, 0.48f);
             line.endColor = line.startColor;
             for (int i = 0; i < line.positionCount; i++)
@@ -145,13 +162,17 @@ namespace GalaxyExplorer.Scope
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
-            return new Material(shader);
+            if (shader == null) shader = Shader.Find("Hidden/InternalErrorShader");
+            return shader != null ? new Material(shader) : null;
         }
 
         private void OnDestroy()
         {
             if (satelliteMaterial != null) Destroy(satelliteMaterial);
             if (orbitMaterial != null) Destroy(orbitMaterial);
+            foreach (Material material in satelliteMaterials)
+                if (material != null) Destroy(material);
+            satelliteMaterials.Clear();
         }
     }
 }
