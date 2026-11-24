@@ -123,6 +123,8 @@ namespace GalaxyExplorer.Scope
                 gameObject.AddComponent<DeepSpaceNebulaBackdrop>();
             if (GetComponent<ProceduralGalaxyBackdrop>() == null)
                 gameObject.AddComponent<ProceduralGalaxyBackdrop>();
+            if (GetComponent<NearbyStarCatalog>() == null)
+                gameObject.AddComponent<NearbyStarCatalog>();
             CreateSun();
 
             foreach (BodyDefinition definition in Definitions)
