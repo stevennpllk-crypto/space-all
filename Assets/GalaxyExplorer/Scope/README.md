@@ -46,3 +46,8 @@ Source files are committed, but this prototype has not yet been compiled or run 
 ## Deep-space nebula backdrop
 
 `DeepSpaceNebulaBackdrop` creates a low-opacity, procedural violet/blue nebula texture on a large transparent sphere surrounding the scene. The texture is generated once at startup using layered Perlin noise and uses a modest 512×256 default resolution. The effect is illustrative rather than a real astronomical image or volumetric gas simulation. `maximumOpacity` and texture dimensions can be adjusted in the Inspector; keep opacity conservative so the starfield and planet silhouettes remain readable on mobile devices.
+
+
+## Procedural Milky Way backdrop
+
+`ProceduralGalaxyBackdrop` creates a stylized spiral galaxy from one point mesh (9,000 stars by default), with a denser central bulge, four loose spiral arms, deterministic placement, and configurable radius, tilt, thickness, and visibility. It avoids creating one GameObject per star and is intended to keep CPU and scene-object overhead low on mobile. The point rendering appearance depends on the active Unity render pipeline and graphics device, so it still requires an in-Editor/device visual check. This is an artistic procedural distribution, not an astronomically measured Milky Way map.
