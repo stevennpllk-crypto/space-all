@@ -58,6 +58,14 @@ if "m_EditorVersion: 6000." not in version:
 print("Source validation passed: required files and JSON configuration are present.")
 print("Note: this check does not compile Unity C# or create an APK.")
 
+# Ensure the generated starter scene launches the actual Solar System Scope runtime.
+scene_installer = (ROOT / "Assets/Editor/GalaxySceneInstaller.cs").read_text(encoding="utf-8")
+if 'scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();' not in scene_installer:
+    raise SystemExit("Starter scene must launch the eight-planet Solar System Scope runtime.")
+if 'bootstrap.AddComponent<GalaxyWorldBootstrap>();' in scene_installer:
+    raise SystemExit("Starter scene must not replace the Solar System Scope with the generic fallback world.")
+print("Solar System Scope starter-scene wiring checks passed.")
+
 # Guard against regressions in runtime material creation and ownership.
 nearby_source = (ROOT / "Assets/GalaxyExplorer/Scope/NearbyStarCatalog.cs").read_text(encoding="utf-8")
 deep_source = (ROOT / "Assets/GalaxyExplorer/Scope/DeepSpaceDestinationCatalog.cs").read_text(encoding="utf-8")
