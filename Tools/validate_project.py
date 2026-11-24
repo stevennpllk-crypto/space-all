@@ -66,6 +66,15 @@ if "typeof(GalaxyExplorer.Scope." in bootstrap_source or "AddComponent<GalaxyExp
     raise SystemExit("Runtime bootstrap must detect the Scope runtime without a compile-time assembly reference.")
 print("Unity assembly-boundary checks passed.")
 
+# Keep the documented Unity menu path aligned with the editor installer.
+scope_readme = (ROOT / "Assets/GalaxyExplorer/Scope/README.md").read_text(encoding="utf-8")
+if "Galaxy Explorer → Setup → Create or Repair Starter Scene" not in scope_readme:
+    raise SystemExit("Scope README must use the actual starter-scene installer menu path.")
+scope_runtime = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeRuntime.cs").read_text(encoding="utf-8")
+if scope_runtime.count('new BodyDefinition("') != 8:
+    raise SystemExit("Solar System Scope runtime must define all eight planets.")
+print("Solar System Scope documentation and planet catalog checks passed.")
+
 # Ensure the generated starter scene launches the actual Solar System Scope runtime.
 scene_installer = (ROOT / "Assets/Editor/GalaxySceneInstaller.cs").read_text(encoding="utf-8")
 if 'scopeRoot.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeRuntime>();' not in scene_installer:
