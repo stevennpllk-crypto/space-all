@@ -139,6 +139,10 @@ namespace GalaxyExplorer.Scope
             if (GetComponent<PlanetSurfaceTextures>() == null)
                 gameObject.AddComponent<PlanetSurfaceTextures>();
 
+            // Add Saturn's procedural ring mesh after the planet objects have been created.
+            if (GetComponent<PlanetaryRingSystem>() == null)
+                gameObject.AddComponent<PlanetaryRingSystem>();
+
             if (Camera.main == null)
             {
                 GameObject cameraObject = new GameObject("Scope Camera");
