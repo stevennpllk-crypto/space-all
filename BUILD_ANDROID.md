@@ -15,8 +15,11 @@ For a Unity Personal license, use the current GameCI activation guidance:
    - macOS: `/Library/Application Support/Unity/Unity_lic.ulf`
    - Linux: `~/.local/share/unity3d/Unity/Unity_lic.ulf`
 4. In the GitHub repository, open **Settings → Secrets and variables → Actions → New repository secret**.
-5. Set the secret name to `UNITY_LICENSE` and paste the complete contents of the `.ulf` file as its value.
-6. Do not commit the `.ulf` file, put it in a public issue, or send it in chat. Never share your Unity password or license contents with another person.
+5. Create these three repository secrets exactly as named:
+   - `UNITY_LICENSE`: paste the complete contents of the `.ulf` file.
+   - `UNITY_EMAIL`: the email address used to sign in to Unity.
+   - `UNITY_PASSWORD`: the password for that Unity account. GameCI uses the account credentials together with the Personal license during CI activation.
+6. Keep all three values private. Do not commit them to the repository, place them in issues, or send them in chat. Never share your Unity password or license contents with another person. Only add them to the repository's Actions secrets if you are authorized to manage that Unity and GitHub account.
 
 If Unity Hub does not create a Personal license file, use Unity's current support/activation guidance for the account and license type. The older manual `.alf` upload route is not a dependable workaround for Personal licenses; do not use scripts that attempt to bypass Unity's license checks.
 
@@ -40,4 +43,4 @@ A successful source-validation workflow is not evidence of a successful Unity co
 
 ## Current blocker
 
-The latest Android build attempt stopped at the license preflight because `UNITY_LICENSE` is not configured in repository Actions secrets. No Unity compilation was attempted and no APK was produced. This secret must be added by an authorized repository/account owner; automation in this chat cannot read or create private GitHub secrets.
+The latest Android build attempt stopped at the license preflight because `UNITY_LICENSE` is not configured in repository Actions secrets. No Unity compilation was attempted and no APK was produced. The CI activation also expects `UNITY_EMAIL` and `UNITY_PASSWORD`, which are now documented above. An authorized repository/account owner must add these secrets in GitHub Settings; automation in this chat cannot read or create private GitHub secrets.
