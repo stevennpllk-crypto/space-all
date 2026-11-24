@@ -182,3 +182,18 @@ for required_text in [
 if "bypass Unity's license checks" not in build_guide:
     raise SystemExit("Android build guide must explicitly reject license-check bypasses.")
 print("Android license documentation checks passed.")
+
+
+# Planet surface maps must not create hidden Renderer.material clones.
+surface_texture_source = (ROOT / "Assets/GalaxyExplorer/Scope/PlanetSurfaceTextures.cs").read_text(encoding="utf-8")
+if "renderer.material" in surface_texture_source:
+    raise SystemExit("Planet surface textures must not create untracked Renderer.material clones.")
+if "renderer.sharedMaterial" not in surface_texture_source:
+    raise SystemExit("Planet surface textures must update the runtime-owned shared material.")
+if "private readonly List<Material> ownedMaterials" not in runtime_source:
+    raise SystemExit("Solar System runtime must track all owned material instances.")
+if "private Mesh starfieldMesh" not in runtime_source or "if (starfieldMesh != null) Destroy(starfieldMesh);" not in runtime_source:
+    raise SystemExit("Solar System runtime must explicitly release its generated starfield mesh.")
+if "foreach (Material material in ownedMaterials)" not in runtime_source:
+    raise SystemExit("Solar System runtime must release all tracked materials on destruction.")
+print("Planet material ownership and starfield cleanup checks passed.")
