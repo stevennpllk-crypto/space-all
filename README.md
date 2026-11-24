@@ -69,3 +69,18 @@ An automated Unity 6 Android APK workflow is available at `.github/workflows/and
 ## Important
 
 The runtime bootstrap creates a starter scene when Play starts, so the code can be tested in a new empty scene. This is not a substitute for a finished authored scene. Visual assets are currently procedural placeholders. The APK/build stage is intentionally deferred until the user says **جمع**.
+
+
+## Solar System Scope implementation
+
+A new self-contained Unity 6 prototype has been added under `Assets/GalaxyExplorer/Scope`.
+It generates the Sun, eight planets, orbit paths, Saturn's rings, a deterministic starfield,
+animated orbital motion, planet selection, educational fact panels, and touch/mouse camera
+navigation at runtime.
+
+To create a demo scene, open Unity and use **Galaxy Explorer → Create Solar System Scope Demo**.
+Save the generated scene and press Play. The prototype uses compressed distances and
+non-linear planet sizes for readability; it is an educational visualization rather than a
+precision ephemeris. See `Assets/GalaxyExplorer/Scope/README.md` for setup and limitations.
+
+The new source has been committed but has not yet been compiled or tested in Unity Editor.
