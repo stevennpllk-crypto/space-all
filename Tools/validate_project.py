@@ -173,6 +173,8 @@ for required_text in [
     "Unity Personal license",
     "Preferences → Licenses → Add",
     "UNITY_LICENSE",
+    "UNITY_EMAIL",
+    "UNITY_PASSWORD",
     "No Unity compilation was attempted",
 ]:
     if required_text not in build_guide:
