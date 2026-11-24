@@ -10,8 +10,15 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
     private static void CreateWorld()
     {
         if (Object.FindObjectOfType<GalaxyWorldBootstrap>() != null) return;
-        // The dedicated Solar System Scope scene owns its own world and camera.
-        if (Object.FindObjectOfType<GalaxyExplorer.Scope.SolarSystemScopeRuntime>() != null) return;
+        // Avoid a compile-time dependency on the separate Scope scripts assembly.
+        // The dedicated Scope scene owns its own world and camera.
+        MonoBehaviour[] sceneBehaviours = Object.FindObjectsOfType<MonoBehaviour>();
+        foreach (MonoBehaviour behaviour in sceneBehaviours)
+        {
+            if (behaviour != null &&
+                behaviour.GetType().FullName == "GalaxyExplorer.Scope.SolarSystemScopeRuntime")
+                return;
+        }
         new GameObject("Galaxy Explorer World").AddComponent<GalaxyWorldBootstrap>();
     }
 
@@ -196,11 +203,6 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
         camera.fieldOfView = 68f;
         camera.nearClipPlane = 0.08f;
         camera.farClipPlane = 1600f;
-
-        if (cameraObject.GetComponent<GalaxyExplorer.Scope.SolarSystemScopeCamera>() == null)
-            cameraObject.AddComponent<GalaxyExplorer.Scope.SolarSystemScopeCamera>();
-        if (cameraObject.GetComponent<GalaxyExplorer.Scope.GalaxyExplorerVRSupport>() == null)
-            cameraObject.AddComponent<GalaxyExplorer.Scope.GalaxyExplorerVRSupport>();
 
         if (FindObjectOfType<SpaceHUD>() == null)
             new GameObject("Galaxy Explorer HUD").AddComponent<SpaceHUD>();
