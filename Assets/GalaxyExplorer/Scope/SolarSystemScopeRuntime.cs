@@ -121,6 +121,8 @@ namespace GalaxyExplorer.Scope
             CreateStarfield();
             if (GetComponent<DeepSpaceNebulaBackdrop>() == null)
                 gameObject.AddComponent<DeepSpaceNebulaBackdrop>();
+            if (GetComponent<ProceduralGalaxyBackdrop>() == null)
+                gameObject.AddComponent<ProceduralGalaxyBackdrop>();
             CreateSun();
 
             foreach (BodyDefinition definition in Definitions)
