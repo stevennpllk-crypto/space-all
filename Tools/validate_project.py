@@ -83,7 +83,7 @@ if "if (shader == null)" not in ring_source or "Destroy(texture);" not in ring_s
     raise SystemExit("Saturn ring material creation must safely handle unavailable shaders.")
 if "if (material == null)" not in ring_source:
     raise SystemExit("Saturn ring renderer must handle failed material creation.")
-if "CreateSaturnRings(planet.transform" in runtime_source:
+if "CreateSaturnRings(planet.transform" in scope_runtime:
     raise SystemExit("Saturn rings must be generated only by PlanetaryRingSystem, not duplicated by the base runtime.")
 print("Saturn ring uniqueness and shader-fallback checks passed.")
 
