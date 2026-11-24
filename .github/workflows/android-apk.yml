@@ -24,6 +24,17 @@ jobs:
         with:
           lfs: true
 
+      - name: Check Unity license configuration
+        shell: bash
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [[ -z "${UNITY_LICENSE//[[:space:]]/}" ]]; then
+            echo "::error title=Unity license missing::Configure the UNITY_LICENSE repository Actions secret before running the Android build."
+            exit 1
+          fi
+          echo "Unity license secret is present."
+
       - name: Build APK with Unity
         uses: game-ci/unity-builder@v4
         env:
