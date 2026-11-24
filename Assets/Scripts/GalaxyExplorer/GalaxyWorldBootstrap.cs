@@ -10,6 +10,8 @@ public sealed class GalaxyWorldBootstrap : MonoBehaviour
     private static void CreateWorld()
     {
         if (Object.FindObjectOfType<GalaxyWorldBootstrap>() != null) return;
+        // The dedicated Solar System Scope scene owns its own world and camera.
+        if (Object.FindObjectOfType<GalaxyExplorer.Scope.SolarSystemScopeRuntime>() != null) return;
         new GameObject("Galaxy Explorer World").AddComponent<GalaxyWorldBootstrap>();
     }
 
