@@ -33,6 +33,9 @@ namespace GalaxyExplorer.Scope
         private Vector3 desiredPan;
         private Camera scopeCamera;
         private bool vrPoseAvailable;
+        private float saveTimer;
+        private const string SavePrefix = "GalaxyExplorer.Camera.";
+        private const string SaveVersionKey = SavePrefix + "Version";
 
         private void Awake()
         {
@@ -44,6 +47,7 @@ namespace GalaxyExplorer.Scope
             targetFocusPoint = focusPoint;
             distance = Mathf.Clamp(Vector3.Distance(transform.position, focusPoint), minimumDistance, maximumDistance);
             targetDistance = distance;
+            LoadExplorationState();
         }
 
         private void LateUpdate()
@@ -51,6 +55,13 @@ namespace GalaxyExplorer.Scope
             ReadMouse();
             ReadTouch();
             ReadKeyboardFlight();
+
+            saveTimer += Time.unscaledDeltaTime;
+            if (saveTimer >= 5f)
+            {
+                saveTimer = 0f;
+                SaveExplorationState();
+            }
 
             float focusBlend = 1f - Mathf.Exp(-focusTransitionSpeed * Time.unscaledDeltaTime);
             focusPoint = Vector3.Lerp(focusPoint, targetFocusPoint, focusBlend);
@@ -218,6 +229,51 @@ namespace GalaxyExplorer.Scope
         public void SetFlySpeed(float value)
         {
             flySpeed = Mathf.Max(0.1f, value);
+        }
+
+        private void LoadExplorationState()
+        {
+            if (PlayerPrefs.GetInt(SaveVersionKey, 0) != 1)
+                return;
+
+            focusPoint = new Vector3(
+                PlayerPrefs.GetFloat(SavePrefix + "FocusX", focusPoint.x),
+                PlayerPrefs.GetFloat(SavePrefix + "FocusY", focusPoint.y),
+                PlayerPrefs.GetFloat(SavePrefix + "FocusZ", focusPoint.z));
+            targetFocusPoint = new Vector3(
+                PlayerPrefs.GetFloat(SavePrefix + "TargetX", focusPoint.x),
+                PlayerPrefs.GetFloat(SavePrefix + "TargetY", focusPoint.y),
+                PlayerPrefs.GetFloat(SavePrefix + "TargetZ", focusPoint.z));
+            yaw = PlayerPrefs.GetFloat(SavePrefix + "Yaw", yaw);
+            pitch = Mathf.Clamp(PlayerPrefs.GetFloat(SavePrefix + "Pitch", pitch), -85f, 85f);
+            distance = Mathf.Clamp(PlayerPrefs.GetFloat(SavePrefix + "Distance", distance), minimumDistance, maximumDistance);
+            targetDistance = Mathf.Clamp(PlayerPrefs.GetFloat(SavePrefix + "TargetDistance", distance), minimumDistance, maximumDistance);
+        }
+
+        private void SaveExplorationState()
+        {
+            PlayerPrefs.SetInt(SaveVersionKey, 1);
+            PlayerPrefs.SetFloat(SavePrefix + "FocusX", focusPoint.x);
+            PlayerPrefs.SetFloat(SavePrefix + "FocusY", focusPoint.y);
+            PlayerPrefs.SetFloat(SavePrefix + "FocusZ", focusPoint.z);
+            PlayerPrefs.SetFloat(SavePrefix + "TargetX", targetFocusPoint.x);
+            PlayerPrefs.SetFloat(SavePrefix + "TargetY", targetFocusPoint.y);
+            PlayerPrefs.SetFloat(SavePrefix + "TargetZ", targetFocusPoint.z);
+            PlayerPrefs.SetFloat(SavePrefix + "Yaw", yaw);
+            PlayerPrefs.SetFloat(SavePrefix + "Pitch", pitch);
+            PlayerPrefs.SetFloat(SavePrefix + "Distance", distance);
+            PlayerPrefs.SetFloat(SavePrefix + "TargetDistance", targetDistance);
+            PlayerPrefs.Save();
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused) SaveExplorationState();
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveExplorationState();
         }
 
         public bool IsVRActive { get { return vrPoseAvailable; } }
