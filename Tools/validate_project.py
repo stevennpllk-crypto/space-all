@@ -196,6 +196,12 @@ if "renderer.material" in surface_texture_source:
     raise SystemExit("Planet surface textures must not create untracked Renderer.material clones.")
 if "renderer.sharedMaterial" not in surface_texture_source:
     raise SystemExit("Planet surface textures must update the runtime-owned shared material.")
+if "FractalWrapped(" not in surface_texture_source or "private float FractalWrapped(" not in surface_texture_source:
+    raise SystemExit("Planet color maps must use seam-wrapped procedural sampling.")
+if "private float Fractal(" in surface_texture_source or "texture.anisoLevel = 2;" not in surface_texture_source:
+    raise SystemExit("Planet surface maps must avoid the old seam-prone sampler and enable modest anisotropic filtering.")
+if "if (material == null) continue;" not in surface_texture_source:
+    raise SystemExit("Planet surface texture assignment must safely handle missing materials.")
 if "private readonly List<Material> ownedMaterials" not in runtime_source:
     raise SystemExit("Solar System runtime must track all owned material instances.")
 if "private Mesh starfieldMesh" not in runtime_source or "if (starfieldMesh != null) Destroy(starfieldMesh);" not in runtime_source:
