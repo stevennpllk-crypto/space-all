@@ -67,6 +67,17 @@ The scope camera is a free exploration camera; there is no spacecraft or vehicle
 
 The scene uses compressed distances. Free-flight movement is a navigation aid, not a physical spacecraft simulation.
 
+## Offline operation and local progress
+
+The core exploration scene is generated from project assets and runtime code; it does not require a remote API or a live service to create the Solar System, navigate the free-flight camera, or inspect the built-in destinations. NASA image assets included under `Assets/Art/NASA` are bundled with the project and remain available offline after installation.
+
+The following progress is stored locally with Unity PlayerPrefs:
+- Discovered-object journal entries.
+- Graphics quality preference.
+- Free-flight camera focus, target focus, yaw, pitch, current distance, and target zoom distance. Camera state is saved periodically and when the app is paused or closed.
+
+An internet connection is still required for downloading/installing the app, remote repository access, cloud builds, and any future optional online content. This offline design has source-level checks; it must still be verified in a built APK by launching the app in airplane mode. Do not treat source validation as proof of a successful Unity build or device test.
+
 ## Optional VR mode
 
 `GalaxyExplorerVRSupport` exposes VR runtime status and configures the camera for both eyes. Head pose is read from Unity XR when an XR runtime is active. A working headset experience still requires an OpenXR-compatible XR Plug-in Management loader and the correct provider settings for the target headset; this repository does not claim headset validation. The standard non-VR camera controls remain available when XR is inactive. Test comfort, frame rate, and controller interaction on the actual target headset before release.
