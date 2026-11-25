@@ -65,7 +65,7 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 
 ## Android APK build
 
-An automated Unity 6 Android APK workflow is available at `.github/workflows/android-apk.yml`. It requires a Unity Personal or Pro license file stored as the repository Actions secret `UNITY_LICENSE`. The first build attempt confirmed that this secret is not configured, so no APK was produced. See [BUILD_ANDROID.md](BUILD_ANDROID.md) for setup instructions. Never paste Unity credentials or license contents into chat or commit them to the repository.
+The phone-only cloud build route is documented in [BUILD_ANDROID_CLOUD.md](BUILD_ANDROID_CLOUD.md). It uses Unity Build Automation's free Personal tier where available, so Unity Editor does not need to be installed on a local computer. Do not enable paid billing. The existing GitHub Actions workflow is a separate fallback and still requires Unity activation secrets. No APK is claimed until a cloud build reports success and provides an APK artifact.
 
 ## Important
 
