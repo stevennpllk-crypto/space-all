@@ -37,7 +37,7 @@ Source files are committed, but this prototype has not yet been compiled or run 
 
 ## Procedural planet surface maps
 
-`PlanetSurfaceTextures` generates deterministic 256×128 color maps at runtime for the eight planets. It uses layered Perlin noise, stylized terrestrial color regions, polar caps on Earth, and banding on the giant planets. The maps are illustrative visual material only: they are not measured satellite imagery, scientifically validated geology, or height/displacement maps. Texture resolution can be adjusted in the component Inspector; the default is intended to keep mobile memory use modest.
+`PlanetSurfaceTextures` generates deterministic 256×128 color maps at runtime for the eight planets. It uses layered Perlin noise, stylized terrestrial color regions, polar caps on Earth, and banding on the giant planets. Longitude sampling wraps around a circular domain so the left and right edges of each equirectangular map meet without the obvious vertical seam common in simple 2D noise maps. Mild anisotropic filtering improves texture readability at grazing angles, and missing planet materials are handled safely. The maps are illustrative visual material only: they are not measured satellite imagery, scientifically validated geology, or height/displacement maps. Texture resolution can be adjusted in the component Inspector; the default is intended to keep mobile memory use modest.
 
 ## Saturn ring system
 
