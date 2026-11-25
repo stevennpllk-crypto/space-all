@@ -199,7 +199,7 @@ if "foreach (Material material in ownedMaterials)" not in runtime_source:
 print("Planet material ownership and starfield cleanup checks passed.")
 
 
-// Offline exploration persistence checks.
+# Offline exploration persistence checks.
 camera_source = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeCamera.cs").read_text(encoding="utf-8")
 for required_token in [
     "LoadExplorationState()",
