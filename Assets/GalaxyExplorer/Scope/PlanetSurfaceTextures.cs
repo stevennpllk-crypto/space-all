@@ -32,6 +32,7 @@ namespace GalaxyExplorer.Scope
                 // The scope runtime creates one unique material per planet and owns its lifetime.
                 // Use sharedMaterial to avoid silently cloning another material instance.
                 Material material = renderer.sharedMaterial;
+                if (material == null) continue;
                 if (material.HasProperty("_BaseMap")) material.SetTexture("_BaseMap", map);
                 if (material.HasProperty("_MainTex")) material.SetTexture("_MainTex", map);
                 material.mainTexture = map;
@@ -44,6 +45,7 @@ namespace GalaxyExplorer.Scope
             texture.name = bodyName + " Procedural Color Map";
             texture.wrapMode = TextureWrapMode.Repeat;
             texture.filterMode = FilterMode.Bilinear;
+            texture.anisoLevel = 2;
 
             Color low, high, accent;
             GetPalette(bodyName, out low, out high, out accent);
@@ -56,8 +58,8 @@ namespace GalaxyExplorer.Scope
                 for (int x = 0; x < textureWidth; x++)
                 {
                     float u = x / (float)textureWidth;
-                    float broad = Fractal(u * 5.5f, v * 3.2f, 4);
-                    float fine = Fractal(u * 29f, v * 17f, 3);
+                    float broad = FractalWrapped(u, v, 5.5f, 3.2f, 4);
+                    float fine = FractalWrapped(u, v, 29f, 17f, 3);
                     float n = Mathf.Clamp01(broad * 0.72f + fine * detailStrength);
                     Color color;
 
@@ -74,7 +76,7 @@ namespace GalaxyExplorer.Scope
                     }
                     else if (bodyName == "Earth")
                     {
-                        float landNoise = Fractal(u * 7.5f + 2f, v * 5f + 1f, 5);
+                        float landNoise = FractalWrapped(u, v, 7.5f, 5f, 5);
                         bool land = landNoise > 0.53f;
                         color = land ? Color.Lerp(high, accent, n * 0.65f) : Color.Lerp(low, high, n * 0.38f);
                         if (latitude > 0.84f) color = Color.Lerp(color, Color.white, (latitude - 0.84f) * 4.2f);
@@ -82,7 +84,7 @@ namespace GalaxyExplorer.Scope
                     else
                     {
                         color = Color.Lerp(low, high, n);
-                        float craterNoise = Fractal(u * 48f, v * 25f, 2);
+                        float craterNoise = FractalWrapped(u, v, 48f, 25f, 2);
                         color = Color.Lerp(color, accent, Mathf.SmoothStep(0.70f, 0.94f, craterNoise) * 0.42f);
                     }
 
@@ -95,19 +97,31 @@ namespace GalaxyExplorer.Scope
             return texture;
         }
 
-        private float Fractal(float x, float y, int octaves)
+        // Sample longitude on a circle so the left and right edges of the
+        // equirectangular map meet without a visible procedural texture seam.
+        private float FractalWrapped(float u, float v, float longitudeScale, float latitudeScale, int octaves)
         {
+            float angle = u * Mathf.PI * 2f;
+            float circleX = Mathf.Cos(angle);
+            float circleY = Mathf.Sin(angle);
             float sum = 0f;
             float amplitude = 0.5f;
             float total = 0f;
+            float frequency = 1f;
+
             for (int i = 0; i < octaves; i++)
             {
-                sum += Mathf.PerlinNoise(x, y) * amplitude;
+                float x = circleX * longitudeScale * frequency;
+                float y = circleY * longitudeScale * frequency;
+                float latitude = v * latitudeScale * frequency;
+                float sampleA = Mathf.PerlinNoise(x + 17.13f, latitude + 4.71f);
+                float sampleB = Mathf.PerlinNoise(y + 31.77f, latitude + 19.23f);
+                sum += ((sampleA + sampleB) * 0.5f) * amplitude;
                 total += amplitude;
-                x *= 2.03f;
-                y *= 2.03f;
                 amplitude *= 0.5f;
+                frequency *= 2.03f;
             }
+
             return total > 0f ? sum / total : 0.5f;
         }
 
