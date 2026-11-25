@@ -204,10 +204,11 @@ func _select_from_screen(screen_position: Vector2) -> void:
 	var origin := camera.project_ray_origin(screen_position)
 	var direction := camera.project_ray_normal(screen_position)
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction * 500.0)
+	query.collide_with_areas = true
 	var result := get_world_3d().direct_space_state.intersect_ray(query)
 	if result.is_empty():
 		return
-	var node: Node = result.collider
+	var node := result.collider as Node
 	while node != null and not node.has_meta("body_name") and node.name != "Sun":
 		node = node.get_parent()
 	if node == null:
@@ -227,4 +228,7 @@ func _save_discoveries() -> void:
 func _load_discoveries() -> void:
 	var config := ConfigFile.new()
 	if config.load("user://discoveries.cfg") == OK:
-		discoveries = config.get_value("progress", "discoveries", [])
+		var saved_entries: Array = config.get_value("progress", "discoveries", [])
+		discoveries.clear()
+		for entry in saved_entries:
+			discoveries.append(str(entry))
