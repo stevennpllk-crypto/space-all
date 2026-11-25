@@ -226,4 +226,12 @@ for required_token in [
         raise SystemExit("Offline camera persistence is missing: " + required_token)
 if "saveTimer >= 5f" not in camera_source:
     raise SystemExit("Camera exploration state must be periodically saved during long sessions.")
-print("Offline camera persistence checks passed.")
+for required_token in [
+    "private bool touchFlightMode;",
+    "FLIGHT MODE: ON",
+    "GetFlightToggleRect(scale).Contains(point)",
+    "Vector3 movement = flightRotation * new Vector3(",
+]:
+    if required_token not in camera_source:
+        raise SystemExit("Mobile free-flight controls are missing: " + required_token)
+print("Offline camera persistence and mobile flight controls checks passed.")
