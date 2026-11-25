@@ -19,6 +19,7 @@ var dragging := false
 var last_pointer := Vector2.ZERO
 var last_pinch_distance := 0.0
 var last_touch_center := Vector2.ZERO
+var active_touches: Dictionary = {}
 var save_clock := 0.0
 
 func _ready() -> void:
@@ -43,8 +44,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			dragging = event.pressed
 			last_pointer = event.position
-		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			last_pointer = event.position
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			target_distance = clamp(target_distance * (1.0 - zoom_sensitivity), min_distance, max_distance)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -56,27 +55,30 @@ func _unhandled_input(event: InputEvent) -> void:
 			_pan_by(event.relative)
 	elif event is InputEventScreenTouch:
 		if event.pressed:
+			active_touches[event.index] = event.position
 			last_pointer = event.position
 		else:
-			last_pinch_distance = 0.0
+			active_touches.erase(event.index)
+			if active_touches.size() < 2:
+				last_pinch_distance = 0.0
 	elif event is InputEventScreenDrag:
-		if Input.get_touch_count() >= 2:
-			var points := _touch_points()
-			if points.size() >= 2:
-				var current_distance: float = points[0].distance_to(points[1])
-				var center: Vector2 = (points[0] + points[1]) * 0.5
-				if last_pinch_distance > 0.0:
-					target_distance = clamp(target_distance * (1.0 - (current_distance - last_pinch_distance) * 0.002), min_distance, max_distance)
-					_pan_by(center - last_touch_center)
-				last_pinch_distance = current_distance
-				last_touch_center = center
+		active_touches[event.index] = event.position
+		var points := _touch_points()
+		if points.size() >= 2:
+			var current_distance: float = points[0].distance_to(points[1])
+			var center: Vector2 = (points[0] + points[1]) * 0.5
+			if last_pinch_distance > 0.0:
+				target_distance = clamp(target_distance * (1.0 - (current_distance - last_pinch_distance) * 0.002), min_distance, max_distance)
+				_pan_by(center - last_touch_center)
+			last_pinch_distance = current_distance
+			last_touch_center = center
 		else:
 			_orbit_by(event.relative)
 
 func _touch_points() -> Array[Vector2]:
 	var result: Array[Vector2] = []
-	for index in range(Input.get_touch_count()):
-		result.append(DisplayServer.mouse_get_position() if index < 0 else Vector2.ZERO)
+	for point in active_touches.values():
+		result.append(point)
 	return result
 
 func _orbit_by(delta: Vector2) -> void:
