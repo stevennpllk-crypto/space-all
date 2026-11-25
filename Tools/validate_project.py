@@ -197,3 +197,21 @@ if "private Mesh starfieldMesh" not in runtime_source or "if (starfieldMesh != n
 if "foreach (Material material in ownedMaterials)" not in runtime_source:
     raise SystemExit("Solar System runtime must release all tracked materials on destruction.")
 print("Planet material ownership and starfield cleanup checks passed.")
+
+
+// Offline exploration persistence checks.
+camera_source = (ROOT / "Assets/GalaxyExplorer/Scope/SolarSystemScopeCamera.cs").read_text(encoding="utf-8")
+for required_token in [
+    "LoadExplorationState()",
+    "SaveExplorationState()",
+    "OnApplicationPause(bool paused)",
+    "OnApplicationQuit()",
+    'SavePrefix + "FocusX"',
+    'SavePrefix + "TargetDistance"',
+    "PlayerPrefs.Save();",
+]:
+    if required_token not in camera_source:
+        raise SystemExit("Offline camera persistence is missing: " + required_token)
+if "saveTimer >= 5f" not in camera_source:
+    raise SystemExit("Camera exploration state must be periodically saved during long sessions.")
+print("Offline camera persistence checks passed.")
