@@ -1,0 +1,22 @@
+name: Godot 4 source validation
+
+on:
+  push:
+    branches: [godot4-migration]
+    paths:
+      - "godot/**"
+      - ".github/workflows/godot-source-validation.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "godot/**"
+      - ".github/workflows/godot-source-validation.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Godot project structure
+        run: python3 godot/Tools/validate_godot_project.py
