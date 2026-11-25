@@ -33,6 +33,7 @@ namespace GalaxyExplorer.Scope
         private Vector3 desiredPan;
         private Camera scopeCamera;
         private bool vrPoseAvailable;
+        private bool touchFlightMode;
         private float saveTimer;
         private const string SavePrefix = "GalaxyExplorer.Camera.";
         private const string SaveVersionKey = SavePrefix + "Version";
@@ -123,9 +124,21 @@ namespace GalaxyExplorer.Scope
                 }
                 if (touch.phase == TouchPhase.Moved)
                 {
-                    yaw += touch.deltaPosition.x * orbitSensitivity * 0.12f;
-                    pitch -= touch.deltaPosition.y * orbitSensitivity * 0.12f;
-                    pitch = Mathf.Clamp(pitch, -85f, 85f);
+                    if (touchFlightMode)
+                    {
+                        Quaternion flightRotation = Quaternion.Euler(pitch, yaw, 0f);
+                        float travelScale = flySpeed * 0.00035f * Mathf.Max(distance / 18f, 0.35f);
+                        Vector3 movement = flightRotation * new Vector3(
+                            -touch.deltaPosition.x, 0f, touch.deltaPosition.y) * travelScale;
+                        focusPoint += movement;
+                        targetFocusPoint += movement;
+                    }
+                    else
+                    {
+                        yaw += touch.deltaPosition.x * orbitSensitivity * 0.12f;
+                        pitch -= touch.deltaPosition.y * orbitSensitivity * 0.12f;
+                        pitch = Mathf.Clamp(pitch, -85f, 85f);
+                    }
                 }
                 lastPinchDistance = 0f;
             }
@@ -158,6 +171,27 @@ namespace GalaxyExplorer.Scope
             }
         }
 
+        private void OnGUI()
+        {
+            if (!Application.isMobilePlatform)
+                return;
+
+            float scale = Mathf.Clamp(Screen.width / 1100f, 0.72f, 1.15f);
+            Matrix4x4 previousMatrix = GUI.matrix;
+            GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
+            Rect buttonRect = GetFlightToggleRect(scale);
+            string label = touchFlightMode ? "FLIGHT MODE: ON" : "FLIGHT MODE: OFF";
+            if (GUI.Button(buttonRect, label))
+                touchFlightMode = !touchFlightMode;
+            GUI.matrix = previousMatrix;
+        }
+
+        private Rect GetFlightToggleRect(float scale)
+        {
+            float logicalWidth = Screen.width / scale;
+            return new Rect((logicalWidth - 190f) * 0.5f, 18f, 190f, 44f);
+        }
+
         private bool IsPointerOverUi(Vector2 screenPosition)
         {
             // Keep camera gestures from moving the scene while the user interacts
@@ -175,7 +209,8 @@ namespace GalaxyExplorer.Scope
                    new Rect(width - 230f, 164f, 210f, 222f).Contains(point) ||
                    new Rect(18f, 326f, 310f, 120f).Contains(point) ||
                    new Rect(width - 230f, 398f, 210f, 194f).Contains(point) ||
-                   new Rect(18f, 455f, 310f, 116f).Contains(point);
+                   new Rect(18f, 455f, 310f, 116f).Contains(point) ||
+                   GetFlightToggleRect(scale).Contains(point);
         }
 
         private void ReadKeyboardFlight()
