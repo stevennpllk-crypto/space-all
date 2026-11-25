@@ -11,11 +11,11 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 - Runtime procedural starfield and seven discoverable planets with 512×256 multi-layer surface maps.
 - Procedural tangent-space normal maps for additional lighting and surface relief.
 - A user-adjustable graphics slider from 50% (performance) to 150% (ultra), saved locally.
-- A ringed gas giant and a custom primitive spacecraft model.
+- A free-flight exploration camera; no spacecraft or vehicle is required.
 - Original procedural engine hum and deep-space ambient audio.
 - Planet rotation and orbital path visuals.
-- Rigidbody spacecraft movement with keyboard and touch input.
-- Smooth third-person chase camera.
+- Touch-first free-flight navigation with orbit, pan, pinch zoom, and selectable celestial destinations.
+- Smooth orbital and free-flight camera transitions.
 - Proximity-based planet discovery and local discovery journal.
 - Runtime HUD showing ship speed and discovery count.
 - Pause overlay and discovery journal.
@@ -36,16 +36,17 @@ This repository is in the **preparation phase**. Scripts, package configuration,
 
 ## Controls (current prototype)
 
-- Desktop: WASD to accelerate/steer, mouse movement to rotate, Q/E to roll, Shift to boost, Ctrl to brake.
-- Mobile: hold and drag on the left side to steer; hold and drag on the right side to rotate.
+- Desktop: drag to orbit, right/middle drag to pan, wheel to zoom, WASD to fly, Q/E for vertical movement, Shift for faster flight.
+- Mobile: one finger to orbit; two fingers to pan and pinch-zoom.
+- Selecting a planet, moon, star, or deep-space destination smoothly focuses the camera.
 - Touch controls and the selected Unity Input handling mode still require Editor/device verification.
 
 ## Preparation roadmap
 
 - [x] Initial Unity C# scaffold
 - [x] Procedural galaxy bootstrap and starter planets
-- [x] Spacecraft flight controller
-- [x] Chase camera
+- [x] Free-flight exploration camera
+- [x] Smooth focus, pan, and zoom controls
 - [x] Discovery journal and HUD
 - [x] Pause menu and journal overlay
 - [x] Adaptive mobile quality profile
