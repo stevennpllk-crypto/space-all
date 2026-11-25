@@ -62,7 +62,7 @@ Source files are committed, but this prototype has not yet been compiled or run 
 
 The scope camera is a free exploration camera; there is no spacecraft or vehicle required.
 - Desktop: left mouse drag orbits the view, right/middle drag pans through space, mouse wheel zooms, WASD moves through the scene, Q/E moves vertically, and Shift increases flight speed.
-- Touch: one finger orbits, two-finger pinch zooms, and two-finger movement pans the view.
+- Touch: one finger orbits by default; use the on-screen **FLIGHT MODE** toggle to change one-finger dragging into forward/backward and lateral free-flight movement. Two-finger pinch zooms and two-finger movement pans the view.
 - Selecting a planet, moon, or catalog destination focuses the camera on that object. The focus transition is smoothed by the camera controller.
 
 The scene uses compressed distances. Free-flight movement is a navigation aid, not a physical spacecraft simulation.
