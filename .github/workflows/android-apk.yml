@@ -28,12 +28,18 @@ jobs:
         shell: bash
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
-          if [[ -z "${UNITY_LICENSE//[[:space:]]/}" ]]; then
-            echo "::error title=Unity license missing::Configure the UNITY_LICENSE repository Actions secret before running the Android build."
+          missing=()
+          [[ -n "${UNITY_LICENSE//[[:space:]]/}" ]] || missing+=("UNITY_LICENSE")
+          [[ -n "${UNITY_EMAIL//[[:space:]]/}" ]] || missing+=("UNITY_EMAIL")
+          [[ -n "${UNITY_PASSWORD//[[:space:]]/}" ]] || missing+=("UNITY_PASSWORD")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error title=Unity activation secrets missing::Configure these repository Actions secrets: ${missing[*]}"
             exit 1
           fi
-          echo "Unity license secret is present."
+          echo "Required Unity activation secrets are present."
 
       - name: Build APK with Unity
         uses: game-ci/unity-builder@v4
