@@ -163,8 +163,14 @@ for asset in nasa_manifest["assets"]:
 android_workflow = (ROOT / ".github/workflows/android-apk.yml").read_text(encoding="utf-8")
 if "Check Unity license configuration" not in android_workflow:
     raise SystemExit("Android workflow must check Unity license configuration before invoking Unity.")
-if 'if [[ -z "${UNITY_LICENSE//[[:space:]]/}" ]]; then' not in android_workflow:
+for secret_name in ["UNITY_LICENSE", "UNITY_EMAIL", "UNITY_PASSWORD"]:
+    token = "${{ secrets." + secret_name + " }}"
+    if token not in android_workflow:
+        raise SystemExit("Android workflow must pass the " + secret_name + " secret to the Unity builder.")
+if "UNITY_LICENSE//[[:space:]]/" not in android_workflow:
     raise SystemExit("Android workflow must reject an empty or whitespace-only Unity license secret.")
+if "UNITY_EMAIL//[[:space:]]/" not in android_workflow or "UNITY_PASSWORD//[[:space:]]/" not in android_workflow:
+    raise SystemExit("Android workflow must reject missing or whitespace-only Unity account secrets.")
 print("Android build license preflight checks passed.")
 
 # Keep the Android build instructions aligned with the supported license workflow.
