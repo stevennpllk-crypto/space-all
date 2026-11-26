@@ -63,6 +63,16 @@ public:
     const TouchPoint* touches() const noexcept { return touches_.data(); }
     std::size_t activeTouchCount() const noexcept { return activeCount_; }
 
+    void cancelAll() noexcept {
+        for (auto& point : touches_) {
+            if (point.active) {
+                point.active = false;
+                point.released = true;
+            }
+        }
+        activeCount_ = 0;
+    }
+
     // Call once after the game has consumed the current frame's input.
     void clearFrame() noexcept {
         for (auto& point : touches_) {
