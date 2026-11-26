@@ -8,6 +8,7 @@
 #include "jassim/render/Camera.hpp"
 #include "jassim/render/Mesh.hpp"
 #include "jassim/render/Material.hpp"
+#include "jassim/render/TextureData.hpp"
 #include "jassim/math/Mat4.hpp"
 
 #include <cassert>
@@ -35,6 +36,7 @@ int main() {
     using jassim::render::Camera;
     using jassim::render::makeUvSphere;
     using jassim::render::Material;
+    using jassim::render::makeProceduralPlanetAlbedo;
     using jassim::math::Mat4;
 
     const Vec3 direction{3.0F, 0.0F, 4.0F};
@@ -113,6 +115,13 @@ int main() {
     camera.rotate(0.25F, 0.2F);
     assert(camera.forward().length() > 0.99F);
     assert(camera.viewProjection().at(3, 2) != 0.0F);
+
+    const auto planetTexture = makeProceduralPlanetAlbedo(64, 32);
+    assert(planetTexture.valid());
+    assert(planetTexture.width == 64 && planetTexture.height == 32);
+    assert(planetTexture.rgb.size() == 64U * 32U * 3U);
+    assert(!makeProceduralPlanetAlbedo(0, 32).valid());
+    assert(!makeProceduralPlanetAlbedo(4096, 32).valid());
 
     const Material defaultMaterial{};
     assert(defaultMaterial.valid());
