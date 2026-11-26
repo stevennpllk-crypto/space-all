@@ -2,7 +2,7 @@
 
 JASSIM Engine is an independent, mobile-first 3D engine project. It is not a Unity fork and does not use Unity runtime or editor code.
 
-## Current milestone: reusable materials and texture data v0.11
+## Current milestone: render queues and multi-object scene preparation v0.12
 
 Implemented:
 - C++17 vector math (dot/cross), column-major 4x4 matrices, and scene/entity storage;
@@ -14,6 +14,8 @@ Implemented:
 - UV texture sampling with mipmapped filtering and a deterministic generated planetary albedo map;
 - portable RGB texture data with dimension/size validation and a reusable procedural planet albedo generator;
 - reusable validated material parameters for albedo tint, ambient/diffuse lighting strength and UV scale, passed to the GLES shader at draw time;
+- a portable render queue that validates draw-item handles and sorts opaque items by material while ordering transparent items back-to-front;
+- render-queue tests covering invalid handles, non-finite/negative distances, opaque material grouping and transparent depth order;
 - per-fragment directional diffuse lighting with ambient contribution;
 - a procedural planet sphere rendered with a configurable material through the mesh pipeline;
 - native multi-touch event forwarding for pointer down/move/up/cancel into the engine input state;
