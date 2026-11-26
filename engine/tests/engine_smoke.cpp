@@ -1,4 +1,5 @@
 #include "jassim/core/EventBus.hpp"
+#include "jassim/core/FrameClock.hpp"
 #include "jassim/core/Scene.hpp"
 #include "jassim/core/ServiceRegistry.hpp"
 #include "jassim/math/Vec3.hpp"
@@ -19,6 +20,7 @@ struct TestService {
 
 int main() {
     using jassim::core::EventBus;
+    using jassim::core::FrameClock;
     using jassim::core::Scene;
     using jassim::core::ServiceRegistry;
     using jassim::math::Vec3;
@@ -82,6 +84,21 @@ int main() {
 
     const auto unknown = DeviceProfile::fromMetrics(DeviceMetrics{});
     assert(unknown.tier == QualityTier::Low);
+
+    FrameClock clock;
+    const auto normalFrame = clock.advance(1.0 / 30.0);
+    assert(normalFrame.fixedSteps == 2);
+    assert(std::fabs(normalFrame.deltaSeconds - (1.0 / 30.0)) < 1.0e-9);
+    assert(normalFrame.interpolationAlpha >= 0.0 && normalFrame.interpolationAlpha < 1.0);
+    const auto slowFrame = clock.advance(2.0);
+    assert(slowFrame.deltaSeconds == FrameClock::MaxFrameDelta);
+    assert(slowFrame.fixedSteps <= FrameClock::MaxFixedSteps);
+    assert(slowFrame.interpolationAlpha >= 0.0 && slowFrame.interpolationAlpha < 1.0);
+    clock.reset();
+    const auto resetFrame = clock.advance(0.0);
+    assert(resetFrame.fixedSteps == 0);
+    assert(resetFrame.interpolationAlpha == 0.0);
+    assert(clock.advance(-1.0).deltaSeconds == 0.0);
 
     InputState input;
     assert(input.touchDown(4, 10.0F, 20.0F));
