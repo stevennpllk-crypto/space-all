@@ -5,6 +5,8 @@
 #include "jassim/math/Vec3.hpp"
 #include "jassim/platform/DeviceProfile.hpp"
 #include "jassim/platform/InputState.hpp"
+#include "jassim/render/Camera.hpp"
+#include "jassim/math/Mat4.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -28,8 +30,13 @@ int main() {
     using jassim::platform::DeviceProfile;
     using jassim::platform::QualityTier;
     using jassim::platform::InputState;
+    using jassim::render::Camera;
+    using jassim::math::Mat4;
 
     const Vec3 direction{3.0F, 0.0F, 4.0F};
+    assert(Vec3::dot(Vec3{1.0F, 0.0F, 0.0F}, Vec3{0.0F, 1.0F, 0.0F}) == 0.0F);
+    const Vec3 perpendicular = Vec3::cross(Vec3{1.0F, 0.0F, 0.0F}, Vec3{0.0F, 1.0F, 0.0F});
+    assert(perpendicular.z == 1.0F);
     const Vec3 unit = direction.normalized();
     assert(std::fabs(unit.length() - 1.0F) < 1.0e-5F);
     assert(Vec3{}.normalized().lengthSquared() == 0.0F);
@@ -84,6 +91,24 @@ int main() {
 
     const auto unknown = DeviceProfile::fromMetrics(DeviceMetrics{});
     assert(unknown.tier == QualityTier::Low);
+
+    const Mat4 identity = Mat4::identity();
+    assert(identity.at(0, 0) == 1.0F && identity.at(3, 3) == 1.0F);
+    const Mat4 perspective = Mat4::perspective(1.04719755F, 16.0F / 9.0F, 0.1F, 1000.0F);
+    assert(perspective.at(0, 0) > 0.0F);
+    assert(perspective.at(3, 2) == -1.0F);
+    const Mat4 invalidProjection = Mat4::perspective(1.0F, 0.0F, 0.1F, 100.0F);
+    assert(invalidProjection.at(0, 0) == 0.0F);
+    const Mat4 view = Mat4::lookAt(Vec3{0.0F, 0.0F, 5.0F}, Vec3{0.0F, 0.0F, 0.0F}, Vec3{0.0F, 1.0F, 0.0F});
+    assert(std::fabs(view.at(2, 3) + 5.0F) < 1.0e-5F);
+    Camera camera;
+    assert(std::fabs(camera.forward().z + 1.0F) < 1.0e-5F);
+    camera.moveLocal(2.0F, 0.0F, -3.0F);
+    assert(std::fabs(camera.position().x - 2.0F) < 1.0e-5F);
+    assert(std::fabs(camera.position().z - 8.0F) < 1.0e-5F);
+    camera.rotate(0.25F, 0.2F);
+    assert(camera.forward().length() > 0.99F);
+    assert(camera.viewProjection().at(3, 2) != 0.0F);
 
     FrameClock clock;
     const auto normalFrame = clock.advance(1.0 / 30.0);
