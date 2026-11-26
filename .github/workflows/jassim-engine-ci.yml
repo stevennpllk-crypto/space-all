@@ -1,0 +1,32 @@
+name: JASSIM Engine Core CI
+
+on:
+  push:
+    branches: [main, jassim-engine-foundation]
+    paths:
+      - "engine/**"
+      - ".github/workflows/jassim-engine-ci.yml"
+  pull_request:
+    paths:
+      - "engine/**"
+      - ".github/workflows/jassim-engine-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S engine -B build/engine -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile
+        run: cmake --build build/engine --parallel 2
+
+      - name: Run tests
+        run: ctest --test-dir build/engine --output-on-failure
