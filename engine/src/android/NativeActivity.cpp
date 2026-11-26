@@ -8,6 +8,7 @@
 #include "jassim/render/Camera.hpp"
 #include "jassim/render/Mesh.hpp"
 #include "jassim/render/Material.hpp"
+#include "jassim/render/TextureData.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -161,30 +162,8 @@ struct AndroidRuntime {
                               reinterpret_cast<void*>(offsetof(jassim::render::MeshVertex, uv)));
         glBindVertexArray(0);
 
-        // Small generated albedo map: deterministic bands and continent-like regions.
-        constexpr int textureWidth = 256;
-        constexpr int textureHeight = 128;
-        std::uint8_t pixels[textureWidth * textureHeight * 3]{};
-        for (int y = 0; y < textureHeight; ++y) {
-            const float latitude = (static_cast<float>(y) / textureHeight - 0.5F) * 3.14159265F;
-            for (int x = 0; x < textureWidth; ++x) {
-                const float u = static_cast<float>(x) / textureWidth;
-                const float v = static_cast<float>(y) / textureHeight;
-                const float field = std::sin(u * 18.0F + std::sin(v * 11.0F) * 2.2F) +
-                                    0.55F * std::sin(u * 37.0F - v * 19.0F) +
-                                    0.25F * std::cos(u * 71.0F + v * 43.0F);
-                const bool land = field > 0.42F && std::fabs(latitude) < 1.35F;
-                const bool ice = std::fabs(latitude) > 1.22F;
-                const std::size_t offset = static_cast<std::size_t>((y * textureWidth + x) * 3);
-                if (ice) {
-                    pixels[offset] = 190; pixels[offset + 1] = 218; pixels[offset + 2] = 235;
-                } else if (land) {
-                    pixels[offset] = 72; pixels[offset + 1] = 142; pixels[offset + 2] = 78;
-                } else {
-                    pixels[offset] = 24; pixels[offset + 1] = 91; pixels[offset + 2] = 166;
-                }
-            }
-        }
+        const auto planetTexture = jassim::render::makeProceduralPlanetAlbedo(256, 128);
+        if (!planetTexture.valid()) return false;
         glGenTextures(1, &albedoTexture);
         glBindTexture(GL_TEXTURE_2D, albedoTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -192,8 +171,10 @@ struct AndroidRuntime {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0,
-                     GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                     static_cast<GLsizei>(planetTexture.width),
+                     static_cast<GLsizei>(planetTexture.height), 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, planetTexture.rgb.data());
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
         glEnable(GL_DEPTH_TEST);
