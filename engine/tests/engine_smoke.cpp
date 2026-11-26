@@ -194,7 +194,7 @@ int main() {
         earthOrbit, 1.5707963267948966);
     assert(std::fabs(orbitQuarter.x) < 1.0e-5F);
     assert(std::fabs(orbitQuarter.z - 2.0F) < 1.0e-5F);
-    assert(!jassim::world::OrbitParameters{-1.0F, 1.0F, 0.0F}.valid());
+    assert((!jassim::world::OrbitParameters{-1.0F, 1.0F, 0.0F}.valid()));
     const auto invalidOrbitPosition = jassim::world::orbitalPosition(earthOrbit,
         std::numeric_limits<double>::quiet_NaN());
     assert(invalidOrbitPosition.lengthSquared() == 0.0F);
