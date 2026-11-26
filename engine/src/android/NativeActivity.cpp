@@ -6,9 +6,12 @@
 
 #include "jassim/platform/InputState.hpp"
 #include "jassim/render/Camera.hpp"
+#include "jassim/render/Mesh.hpp"
 
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 
 namespace {
 
@@ -16,26 +19,26 @@ constexpr const char* kLogTag = "JASSIM.Engine";
 
 constexpr const char* kVertexShader = R"(#version 300 es
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec3 aColor;
+layout(location = 1) in vec3 aNormal;
 uniform mat4 uViewProjection;
-out vec3 vColor;
+out vec3 vNormal;
 void main() {
     gl_Position = uViewProjection * vec4(aPosition, 1.0);
-    vColor = aColor;
+    vNormal = aNormal;
 })";
 
 constexpr const char* kFragmentShader = R"(#version 300 es
 precision mediump float;
-in vec3 vColor;
+in vec3 vNormal;
+uniform vec3 uBaseColor;
 out vec4 outColor;
 void main() {
-    outColor = vec4(vColor, 1.0);
+    vec3 normal = normalize(vNormal);
+    vec3 lightDirection = normalize(vec3(-0.45, 0.65, 0.60));
+    float diffuse = max(dot(normal, lightDirection), 0.0);
+    float illumination = 0.18 + diffuse * 0.82;
+    outColor = vec4(uBaseColor * illumination, 1.0);
 })";
-
-struct Vertex {
-    float position[3];
-    float color[3];
-};
 
 GLuint compileShader(GLenum type, const char* source) {
     const GLuint shader = glCreateShader(type);
@@ -93,7 +96,10 @@ struct AndroidRuntime {
     GLuint program{0};
     GLuint vertexArray{0};
     GLuint vertexBuffer{0};
+    GLuint indexBuffer{0};
+    GLsizei indexCount{0};
     GLint viewProjectionLocation{-1};
+    GLint baseColorLocation{-1};
     jassim::platform::InputState input{};
     jassim::render::Camera camera{};
 
@@ -101,24 +107,34 @@ struct AndroidRuntime {
         program = createProgram();
         if (program == 0) return false;
         viewProjectionLocation = glGetUniformLocation(program, "uViewProjection");
+        baseColorLocation = glGetUniformLocation(program, "uBaseColor");
 
-        constexpr Vertex vertices[] = {
-            {{ 0.0F,  1.15F, 0.0F}, {0.20F, 0.75F, 1.00F}},
-            {{-1.0F, -0.75F, 0.0F}, {0.35F, 0.35F, 1.00F}},
-            {{ 1.0F, -0.75F, 0.0F}, {0.65F, 0.30F, 1.00F}}
-        };
+        const auto sphere = jassim::render::makeUvSphere(1.25F, 40, 28);
+        if (!sphere.valid() || sphere.indices.size() >
+                static_cast<std::size_t>(std::numeric_limits<GLsizei>::max())) {
+            __android_log_print(ANDROID_LOG_ERROR, kLogTag, "Procedural sphere mesh is invalid");
+            return false;
+        }
+        indexCount = static_cast<GLsizei>(sphere.indices.size());
 
         glGenVertexArrays(1, &vertexArray);
         glGenBuffers(1, &vertexBuffer);
+        glGenBuffers(1, &indexBuffer);
         glBindVertexArray(vertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,
+                     static_cast<GLsizeiptr>(sphere.vertices.size() * sizeof(jassim::render::MeshVertex)),
+                     sphere.vertices.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     static_cast<GLsizeiptr>(sphere.indices.size() * sizeof(std::uint32_t)),
+                     sphere.indices.data(), GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              reinterpret_cast<void*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(jassim::render::MeshVertex),
+                              reinterpret_cast<void*>(offsetof(jassim::render::MeshVertex, position)));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              reinterpret_cast<void*>(offsetof(Vertex, color)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(jassim::render::MeshVertex),
+                              reinterpret_cast<void*>(offsetof(jassim::render::MeshVertex, normal)));
         glBindVertexArray(0);
         glEnable(GL_DEPTH_TEST);
         return glGetError() == GL_NO_ERROR;
@@ -183,8 +199,9 @@ struct AndroidRuntime {
             const auto matrix = camera.viewProjection();
             glUseProgram(program);
             glUniformMatrix4fv(viewProjectionLocation, 1, GL_FALSE, matrix.values.data());
+            glUniform3f(baseColorLocation, 0.16F, 0.48F, 0.92F);
             glBindVertexArray(vertexArray);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
             glBindVertexArray(0);
         }
         eglSwapBuffers(display, surface);
@@ -193,11 +210,13 @@ struct AndroidRuntime {
     void shutdown() {
         if (display != EGL_NO_DISPLAY) {
             eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            if (indexBuffer) glDeleteBuffers(1, &indexBuffer);
             if (vertexBuffer) glDeleteBuffers(1, &vertexBuffer);
             if (vertexArray) glDeleteVertexArrays(1, &vertexArray);
             if (program) glDeleteProgram(program);
-            vertexBuffer = vertexArray = program = 0;
-            viewProjectionLocation = -1;
+            indexBuffer = vertexBuffer = vertexArray = program = 0;
+            indexCount = 0;
+            viewProjectionLocation = baseColorLocation = -1;
             if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
             if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
             eglTerminate(display);
