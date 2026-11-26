@@ -10,6 +10,7 @@ namespace jassim::render {
 struct MeshVertex {
     float position[3]{};
     float normal[3]{};
+    float uv[2]{};
 };
 
 struct MeshData {
@@ -59,7 +60,8 @@ inline MeshData makeUvSphere(float radius = 1.0F,
             const float nz = sinTheta * std::sin(phi);
             mesh.vertices.push_back({
                 {radius * nx, radius * ny, radius * nz},
-                {nx, ny, nz}
+                {nx, ny, nz},
+                {u, 1.0F - v}
             });
         }
     }
