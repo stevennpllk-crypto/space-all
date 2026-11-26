@@ -5,10 +5,84 @@
 #include <GLES3/gl3.h>
 
 #include "jassim/platform/InputState.hpp"
+#include "jassim/render/Camera.hpp"
+
+#include <cmath>
+#include <cstddef>
 
 namespace {
 
 constexpr const char* kLogTag = "JASSIM.Engine";
+
+constexpr const char* kVertexShader = R"(#version 300 es
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aColor;
+uniform mat4 uViewProjection;
+out vec3 vColor;
+void main() {
+    gl_Position = uViewProjection * vec4(aPosition, 1.0);
+    vColor = aColor;
+})";
+
+constexpr const char* kFragmentShader = R"(#version 300 es
+precision mediump float;
+in vec3 vColor;
+out vec4 outColor;
+void main() {
+    outColor = vec4(vColor, 1.0);
+})";
+
+struct Vertex {
+    float position[3];
+    float color[3];
+};
+
+GLuint compileShader(GLenum type, const char* source) {
+    const GLuint shader = glCreateShader(type);
+    if (shader == 0) return 0;
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
+    GLint compiled = GL_FALSE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_TRUE) return shader;
+
+    GLint logLength = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+    if (logLength > 1) {
+        char log[1024]{};
+        glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+        __android_log_print(ANDROID_LOG_ERROR, kLogTag, "Shader compile failed: %s", log);
+    }
+    glDeleteShader(shader);
+    return 0;
+}
+
+GLuint createProgram() {
+    const GLuint vertex = compileShader(GL_VERTEX_SHADER, kVertexShader);
+    const GLuint fragment = compileShader(GL_FRAGMENT_SHADER, kFragmentShader);
+    if (vertex == 0 || fragment == 0) {
+        if (vertex) glDeleteShader(vertex);
+        if (fragment) glDeleteShader(fragment);
+        return 0;
+    }
+
+    const GLuint program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
+    GLint linked = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked == GL_TRUE) return program;
+
+    char log[1024]{};
+    glGetProgramInfoLog(program, sizeof(log), nullptr, log);
+    __android_log_print(ANDROID_LOG_ERROR, kLogTag, "Program link failed: %s", log);
+    glDeleteProgram(program);
+    return 0;
+}
 
 struct AndroidRuntime {
     EGLDisplay display{EGL_NO_DISPLAY};
@@ -16,7 +90,39 @@ struct AndroidRuntime {
     EGLContext context{EGL_NO_CONTEXT};
     int width{0};
     int height{0};
+    GLuint program{0};
+    GLuint vertexArray{0};
+    GLuint vertexBuffer{0};
+    GLint viewProjectionLocation{-1};
     jassim::platform::InputState input{};
+    jassim::render::Camera camera{};
+
+    bool createSceneResources() {
+        program = createProgram();
+        if (program == 0) return false;
+        viewProjectionLocation = glGetUniformLocation(program, "uViewProjection");
+
+        constexpr Vertex vertices[] = {
+            {{ 0.0F,  1.15F, 0.0F}, {0.20F, 0.75F, 1.00F}},
+            {{-1.0F, -0.75F, 0.0F}, {0.35F, 0.35F, 1.00F}},
+            {{ 1.0F, -0.75F, 0.0F}, {0.65F, 0.30F, 1.00F}}
+        };
+
+        glGenVertexArrays(1, &vertexArray);
+        glGenBuffers(1, &vertexBuffer);
+        glBindVertexArray(vertexArray);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void*>(offsetof(Vertex, position)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              reinterpret_cast<void*>(offsetof(Vertex, color)));
+        glBindVertexArray(0);
+        glEnable(GL_DEPTH_TEST);
+        return glGetError() == GL_NO_ERROR;
+    }
 
     bool initialize(ANativeWindow* window) {
         display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -54,7 +160,17 @@ struct AndroidRuntime {
         eglQuerySurface(display, surface, EGL_WIDTH, &width);
         eglQuerySurface(display, surface, EGL_HEIGHT, &height);
         glViewport(0, 0, width, height);
-        __android_log_print(ANDROID_LOG_INFO, kLogTag, "GLES3 context ready: %dx%d", width, height);
+        camera.setPerspective(1.0471975512F,
+                              height > 0 ? static_cast<float>(width) / height : 1.0F,
+                              0.1F, 10000.0F);
+
+        if (!createSceneResources()) {
+            __android_log_print(ANDROID_LOG_ERROR, kLogTag, "Scene renderer initialization failed");
+            shutdown();
+            return false;
+        }
+        __android_log_print(ANDROID_LOG_INFO, kLogTag,
+                            "GLES3 renderer ready: %dx%d", width, height);
         return true;
     }
 
@@ -63,12 +179,25 @@ struct AndroidRuntime {
         glViewport(0, 0, width, height);
         glClearColor(0.012F, 0.025F, 0.075F, 1.0F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if (program != 0 && vertexArray != 0) {
+            const auto matrix = camera.viewProjection();
+            glUseProgram(program);
+            glUniformMatrix4fv(viewProjectionLocation, 1, GL_FALSE, matrix.values.data());
+            glBindVertexArray(vertexArray);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glBindVertexArray(0);
+        }
         eglSwapBuffers(display, surface);
     }
 
     void shutdown() {
         if (display != EGL_NO_DISPLAY) {
             eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            if (vertexBuffer) glDeleteBuffers(1, &vertexBuffer);
+            if (vertexArray) glDeleteVertexArrays(1, &vertexArray);
+            if (program) glDeleteProgram(program);
+            vertexBuffer = vertexArray = program = 0;
+            viewProjectionLocation = -1;
             if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
             if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
             eglTerminate(display);
@@ -89,6 +218,12 @@ void handleCommand(android_app* app, int32_t command) {
     if (command == APP_CMD_INIT_WINDOW && app->window != nullptr) {
         runtime->shutdown();
         runtime->initialize(app->window);
+    } else if (command == APP_CMD_WINDOW_RESIZED && runtime->display != EGL_NO_DISPLAY) {
+        eglQuerySurface(runtime->display, runtime->surface, EGL_WIDTH, &runtime->width);
+        eglQuerySurface(runtime->display, runtime->surface, EGL_HEIGHT, &runtime->height);
+        runtime->camera.setPerspective(1.0471975512F,
+            runtime->height > 0 ? static_cast<float>(runtime->width) / runtime->height : 1.0F,
+            0.1F, 10000.0F);
     } else if (command == APP_CMD_TERM_WINDOW) {
         runtime->shutdown();
         runtime->input.cancelAll();
