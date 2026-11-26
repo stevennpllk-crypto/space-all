@@ -2,11 +2,13 @@
 
 JASSIM Engine is an independent, mobile-first 3D engine project. It is not a Unity fork and does not use Unity runtime or editor code.
 
-## Current milestone: portable core v0.5
+## Current milestone: Android runtime foundation v0.6
 
 Implemented:
 - C++17 vector math (dot/cross), column-major 4x4 matrices, and scene/entity storage;
 - a free-flight 3D camera with view, perspective projection, and local-space movement;
+- an Android NativeActivity entry point with EGL lifecycle handling and a minimal OpenGL ES 3 clear/swap loop;
+- an Android manifest declaring GLES 3.0 and the native engine library;
 - type-safe service registry with explicit shared ownership;
 - synchronous typed event bus with subscription removal;
 - conservative Low / Medium / High device quality profiles;
@@ -16,7 +18,7 @@ Implemented:
 
 The quality selector treats unknown device metrics conservatively. A device with 3 GB RAM is assigned the Low profile by design; this is a starting policy, not a measured performance guarantee.
 
-This is **not yet a complete 3D engine** and does not produce an APK. Android lifecycle/surface integration, an OpenGL ES renderer backend, asset loading, physics, editor tooling, and APK packaging remain future milestones.
+This is **not yet a complete 3D engine** and does not produce an APK. The Android NativeActivity and GLES3 context smoke layer now exist. A full scene renderer, shader/material pipeline, asset loading, physics, editor tooling, Gradle APK packaging, and physical-device validation remain future milestones.
 
 ## Technical direction
 
@@ -42,8 +44,8 @@ ctest --test-dir build/engine --output-on-failure
 ## Planned milestones
 
 1. **Portable core** — math, scene/entity lifecycle, services, events, quality profiles, touch input, frame timing.
-2. **Android platform layer** — lifecycle, native surface, touch event forwarding, and frame loop.
-3. **Renderer** — GLES backend, shader programs, mesh buffers, camera integration, depth and lighting.
+2. **Android platform layer** — NativeActivity lifecycle, EGL surface/context, GLES3 frame loop; touch forwarding is next.
+3. **Renderer** — GLES shader programs, mesh buffers, camera integration, depth and lighting.
 4. **3D content** — sphere/mesh primitives, materials, texture loading and asset manifest.
 5. **World systems** — scene serialization, resource cache, basic physics and audio interfaces.
 6. **Editor** — lightweight desktop scene editor and project inspector.
