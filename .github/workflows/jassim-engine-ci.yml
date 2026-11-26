@@ -30,3 +30,27 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build/engine --output-on-failure
+
+  android-arm64-core-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: sdkmanager "ndk;27.2.12479018"
+
+      - name: Configure ARM64 core
+        run: >
+          cmake -S engine -B build/android-arm64
+          -DCMAKE_TOOLCHAIN_FILE="$ANDROID_HOME/ndk/27.2.12479018/build/cmake/android.toolchain.cmake"
+          -DANDROID_ABI=arm64-v8a
+          -DANDROID_PLATFORM=android-26
+          -DBUILD_TESTING=OFF
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile ARM64 core
+        run: cmake --build build/android-arm64 --parallel 2
