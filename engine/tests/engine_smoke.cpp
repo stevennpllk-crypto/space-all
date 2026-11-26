@@ -10,11 +10,13 @@
 #include "jassim/render/Material.hpp"
 #include "jassim/render/TextureData.hpp"
 #include "jassim/render/RenderQueue.hpp"
+#include "jassim/world/Orbit.hpp"
 #include "jassim/math/Mat4.hpp"
 
 #include <cassert>
 #include <cmath>
 #include <memory>
+#include <limits>
 
 struct TickEvent {
     int frame;
@@ -182,6 +184,20 @@ int main() {
     assert(queued[3].entity == 3 && queued[3].cameraDistanceSquared == 9.0F);
     renderQueue.clear();
     assert(renderQueue.empty());
+
+    const jassim::world::OrbitParameters earthOrbit{2.0F, 1.0F, 0.0F};
+    assert(earthOrbit.valid());
+    const auto orbitStart = jassim::world::orbitalPosition(earthOrbit, 0.0);
+    assert(std::fabs(orbitStart.x - 2.0F) < 1.0e-5F);
+    assert(std::fabs(orbitStart.z) < 1.0e-5F);
+    const auto orbitQuarter = jassim::world::orbitalPosition(
+        earthOrbit, 1.5707963267948966);
+    assert(std::fabs(orbitQuarter.x) < 1.0e-5F);
+    assert(std::fabs(orbitQuarter.z - 2.0F) < 1.0e-5F);
+    assert(!jassim::world::OrbitParameters{-1.0F, 1.0F, 0.0F}.valid());
+    const auto invalidOrbitPosition = jassim::world::orbitalPosition(earthOrbit,
+        std::numeric_limits<double>::quiet_NaN());
+    assert(invalidOrbitPosition.lengthSquared() == 0.0F);
 
     FrameClock clock;
     const auto normalFrame = clock.advance(1.0 / 30.0);
