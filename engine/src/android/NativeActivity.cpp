@@ -7,6 +7,7 @@
 #include "jassim/platform/InputState.hpp"
 #include "jassim/render/Camera.hpp"
 #include "jassim/render/Mesh.hpp"
+#include "jassim/render/Material.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -35,13 +36,17 @@ precision mediump float;
 in vec3 vNormal;
 in vec2 vUv;
 uniform sampler2D uAlbedo;
+uniform vec3 uAlbedoTint;
+uniform float uAmbientStrength;
+uniform float uDiffuseStrength;
+uniform float uUvScale;
 out vec4 outColor;
 void main() {
     vec3 normal = normalize(vNormal);
     vec3 lightDirection = normalize(vec3(-0.45, 0.65, 0.60));
     float diffuse = max(dot(normal, lightDirection), 0.0);
-    float illumination = 0.18 + diffuse * 0.82;
-    vec3 albedo = texture(uAlbedo, vUv).rgb;
+    float illumination = uAmbientStrength + diffuse * uDiffuseStrength;
+    vec3 albedo = texture(uAlbedo, vUv * uUvScale).rgb * uAlbedoTint;
     outColor = vec4(albedo * illumination, 1.0);
 })";
 
@@ -105,16 +110,25 @@ struct AndroidRuntime {
     GLuint albedoTexture{0};
     GLsizei indexCount{0};
     GLint viewProjectionLocation{-1};
-    GLint baseColorLocation{-1};
     GLint albedoLocation{-1};
+    GLint albedoTintLocation{-1};
+    GLint ambientStrengthLocation{-1};
+    GLint diffuseStrengthLocation{-1};
+    GLint uvScaleLocation{-1};
     jassim::platform::InputState input{};
     jassim::render::Camera camera{};
+    jassim::render::Material planetMaterial{};
 
     bool createSceneResources() {
         program = createProgram();
         if (program == 0) return false;
         viewProjectionLocation = glGetUniformLocation(program, "uViewProjection");
         albedoLocation = glGetUniformLocation(program, "uAlbedo");
+        albedoTintLocation = glGetUniformLocation(program, "uAlbedoTint");
+        ambientStrengthLocation = glGetUniformLocation(program, "uAmbientStrength");
+        diffuseStrengthLocation = glGetUniformLocation(program, "uDiffuseStrength");
+        uvScaleLocation = glGetUniformLocation(program, "uUvScale");
+        if (!planetMaterial.valid()) return false;
 
         const auto sphere = jassim::render::makeUvSphere(1.25F, 40, 28);
         if (!sphere.valid() || sphere.indices.size() >
@@ -248,6 +262,11 @@ struct AndroidRuntime {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, albedoTexture);
             glUniform1i(albedoLocation, 0);
+            glUniform3f(albedoTintLocation, planetMaterial.albedoTint[0],
+                        planetMaterial.albedoTint[1], planetMaterial.albedoTint[2]);
+            glUniform1f(ambientStrengthLocation, planetMaterial.ambientStrength);
+            glUniform1f(diffuseStrengthLocation, planetMaterial.diffuseStrength);
+            glUniform1f(uvScaleLocation, planetMaterial.uvScale);
             glBindVertexArray(vertexArray);
             glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
             glBindVertexArray(0);
@@ -267,6 +286,7 @@ struct AndroidRuntime {
             indexBuffer = vertexBuffer = vertexArray = program = 0;
             indexCount = 0;
             viewProjectionLocation = albedoLocation = -1;
+            albedoTintLocation = ambientStrengthLocation = diffuseStrengthLocation = uvScaleLocation = -1;
             if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
             if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
             eglTerminate(display);
