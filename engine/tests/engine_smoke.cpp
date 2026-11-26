@@ -7,6 +7,7 @@
 #include "jassim/platform/InputState.hpp"
 #include "jassim/render/Camera.hpp"
 #include "jassim/render/Mesh.hpp"
+#include "jassim/render/Material.hpp"
 #include "jassim/math/Mat4.hpp"
 
 #include <cassert>
@@ -33,6 +34,7 @@ int main() {
     using jassim::platform::InputState;
     using jassim::render::Camera;
     using jassim::render::makeUvSphere;
+    using jassim::render::Material;
     using jassim::math::Mat4;
 
     const Vec3 direction{3.0F, 0.0F, 4.0F};
@@ -111,6 +113,20 @@ int main() {
     camera.rotate(0.25F, 0.2F);
     assert(camera.forward().length() > 0.99F);
     assert(camera.viewProjection().at(3, 2) != 0.0F);
+
+    const Material defaultMaterial{};
+    assert(defaultMaterial.valid());
+    Material customMaterial;
+    customMaterial.albedoTint = {0.8F, 0.45F, 0.2F};
+    customMaterial.ambientStrength = 0.25F;
+    customMaterial.diffuseStrength = 1.1F;
+    customMaterial.uvScale = 2.0F;
+    assert(customMaterial.valid());
+    customMaterial.uvScale = 0.0F;
+    assert(!customMaterial.valid());
+    customMaterial.uvScale = 1.0F;
+    customMaterial.albedoTint[1] = 1.5F;
+    assert(!customMaterial.valid());
 
     const auto sphere = makeUvSphere(2.0F, 16, 8);
     assert(sphere.valid());
