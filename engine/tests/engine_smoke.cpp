@@ -3,6 +3,7 @@
 #include "jassim/core/ServiceRegistry.hpp"
 #include "jassim/math/Vec3.hpp"
 #include "jassim/platform/DeviceProfile.hpp"
+#include "jassim/platform/InputState.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -24,6 +25,7 @@ int main() {
     using jassim::platform::DeviceMetrics;
     using jassim::platform::DeviceProfile;
     using jassim::platform::QualityTier;
+    using jassim::platform::InputState;
 
     const Vec3 direction{3.0F, 0.0F, 4.0F};
     const Vec3 unit = direction.normalized();
@@ -80,6 +82,25 @@ int main() {
 
     const auto unknown = DeviceProfile::fromMetrics(DeviceMetrics{});
     assert(unknown.tier == QualityTier::Low);
+
+    InputState input;
+    assert(input.touchDown(4, 10.0F, 20.0F));
+    assert(!input.touchDown(4, 10.0F, 20.0F));
+    assert(input.touchDown(7, 30.0F, 40.0F));
+    assert(input.activeTouchCount() == 2);
+    assert(input.touchMove(4, 15.0F, 24.0F));
+    assert(input.touchMove(4, 18.0F, 29.0F));
+    const auto* points = input.touches();
+    assert(points[0].id == 4);
+    assert(points[0].pressed);
+    assert(points[0].deltaX == 8.0F);
+    assert(points[0].deltaY == 9.0F);
+    assert(input.touchUp(4, 20.0F, 30.0F));
+    assert(input.activeTouchCount() == 1);
+    assert(!input.touchDown(4, 0.0F, 0.0F));
+    input.clearFrame();
+    assert(input.touchDown(4, 0.0F, 0.0F));
+    assert(input.activeTouchCount() == 2);
 
     return 0;
 }
