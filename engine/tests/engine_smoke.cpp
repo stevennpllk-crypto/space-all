@@ -127,12 +127,16 @@ int main() {
             vertex.position[1] * vertex.position[1] +
             vertex.position[2] * vertex.position[2]);
         assert(std::fabs(positionLength - 2.0F) < 1.0e-4F);
+        assert(vertex.uv[0] >= 0.0F && vertex.uv[0] <= 1.0F);
+        assert(vertex.uv[1] >= 0.0F && vertex.uv[1] <= 1.0F);
     }
     for (const auto index : sphere.indices) {
         assert(index < sphere.vertices.size());
     }
     assert(!makeUvSphere(0.0F, 16, 8).valid());
     assert(!makeUvSphere(1.0F, 2, 8).valid());
+    assert(std::fabs(sphere.vertices.front().uv[0]) < 1.0e-6F);
+    assert(std::fabs(sphere.vertices[16].uv[0] - 1.0F) < 1.0e-6F);
 
     FrameClock clock;
     const auto normalFrame = clock.advance(1.0 / 30.0);
