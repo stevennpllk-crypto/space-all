@@ -9,6 +9,7 @@
 #include "jassim/render/Mesh.hpp"
 #include "jassim/render/Material.hpp"
 #include "jassim/render/TextureData.hpp"
+#include "jassim/render/RenderQueue.hpp"
 #include "jassim/math/Mat4.hpp"
 
 #include <cassert>
@@ -162,6 +163,25 @@ int main() {
     assert(!makeUvSphere(1.0F, 2, 8).valid());
     assert(std::fabs(sphere.vertices.front().uv[0]) < 1.0e-6F);
     assert(std::fabs(sphere.vertices[16].uv[0] - 1.0F) < 1.0e-6F);
+
+    jassim::render::RenderQueue renderQueue;
+    assert(renderQueue.empty());
+    assert(!renderQueue.submit({0, 1, 1, 4.0F, false}));
+    assert(!renderQueue.submit({1, 0, 1, 4.0F, false}));
+    assert(!renderQueue.submit({1, 1, 1, -1.0F, false}));
+    assert(renderQueue.submit({3, 7, 2, 9.0F, true}));
+    assert(renderQueue.submit({2, 6, 4, 4.0F, false}));
+    assert(renderQueue.submit({1, 5, 4, 16.0F, true}));
+    assert(renderQueue.submit({4, 8, 1, 1.0F, false}));
+    assert(renderQueue.size() == 4);
+    renderQueue.sort();
+    const auto& queued = renderQueue.items();
+    assert(queued[0].entity == 4 && queued[0].material == 1);
+    assert(queued[1].entity == 2 && queued[1].material == 4);
+    assert(queued[2].entity == 1 && queued[2].cameraDistanceSquared == 16.0F);
+    assert(queued[3].entity == 3 && queued[3].cameraDistanceSquared == 9.0F);
+    renderQueue.clear();
+    assert(renderQueue.empty());
 
     FrameClock clock;
     const auto normalFrame = clock.advance(1.0 / 30.0);
