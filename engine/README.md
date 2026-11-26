@@ -2,7 +2,7 @@
 
 JASSIM Engine is an independent, mobile-first 3D engine project. It is not a Unity fork and does not use Unity runtime or editor code.
 
-## Current milestone: portable core v0.3
+## Current milestone: portable core v0.4
 
 Implemented:
 - C++17 vector math and scene/entity storage;
@@ -10,6 +10,7 @@ Implemented:
 - synchronous typed event bus with subscription removal;
 - conservative Low / Medium / High device quality profiles;
 - fixed-capacity, allocation-free multi-touch state with press, move, release, and frame-reset transitions;
+- bounded fixed-step frame clock with delta clamping and catch-up limits;
 - CMake build and automated smoke tests covering these systems.
 
 The quality selector treats unknown device metrics conservatively. A device with 3 GB RAM is assigned the Low profile by design; this is a starting policy, not a measured performance guarantee.
@@ -39,8 +40,8 @@ ctest --test-dir build/engine --output-on-failure
 
 ## Planned milestones
 
-1. **Portable core** — math, scene/entity lifecycle, services, events, quality profiles, tests.
-2. **Android platform layer** — lifecycle, touch input, surface and frame loop.
+1. **Portable core** — math, scene/entity lifecycle, services, events, quality profiles, touch input, frame timing.
+2. **Android platform layer** — lifecycle, native surface, touch event forwarding, and frame loop.
 3. **Renderer** — GLES backend, shaders, mesh buffers, camera, depth and lighting.
 4. **3D content** — sphere/mesh primitives, materials, texture loading and asset manifest.
 5. **World systems** — scene serialization, resource cache, basic physics and audio interfaces.
