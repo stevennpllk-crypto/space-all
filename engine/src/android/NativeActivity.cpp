@@ -9,10 +9,12 @@
 #include "jassim/render/Mesh.hpp"
 #include "jassim/render/Material.hpp"
 #include "jassim/render/TextureData.hpp"
+#include "jassim/world/Orbit.hpp"
 
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <chrono>
 #include <limits>
 
 namespace {
@@ -24,11 +26,12 @@ layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aUv;
 uniform mat4 uViewProjection;
+uniform mat4 uModel;
 out vec3 vNormal;
 out vec2 vUv;
 void main() {
     vUv = aUv;
-    gl_Position = uViewProjection * vec4(aPosition, 1.0);
+    gl_Position = uViewProjection * uModel * vec4(aPosition, 1.0);
     vNormal = aNormal;
 })";
 
@@ -111,6 +114,7 @@ struct AndroidRuntime {
     GLuint albedoTexture{0};
     GLsizei indexCount{0};
     GLint viewProjectionLocation{-1};
+    GLint modelLocation{-1};
     GLint albedoLocation{-1};
     GLint albedoTintLocation{-1};
     GLint ambientStrengthLocation{-1};
@@ -119,11 +123,13 @@ struct AndroidRuntime {
     jassim::platform::InputState input{};
     jassim::render::Camera camera{};
     jassim::render::Material planetMaterial{};
+    std::chrono::steady_clock::time_point sceneStart{std::chrono::steady_clock::now()};
 
     bool createSceneResources() {
         program = createProgram();
         if (program == 0) return false;
         viewProjectionLocation = glGetUniformLocation(program, "uViewProjection");
+        modelLocation = glGetUniformLocation(program, "uModel");
         albedoLocation = glGetUniformLocation(program, "uAlbedo");
         albedoTintLocation = glGetUniformLocation(program, "uAlbedoTint");
         ambientStrengthLocation = glGetUniformLocation(program, "uAmbientStrength");
@@ -237,19 +243,45 @@ struct AndroidRuntime {
         glClearColor(0.012F, 0.025F, 0.075F, 1.0F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (program != 0 && vertexArray != 0) {
-            const auto matrix = camera.viewProjection();
+            const auto viewProjection = camera.viewProjection();
+            const double elapsed = std::chrono::duration<double>(
+                std::chrono::steady_clock::now() - sceneStart).count();
+            struct Body {
+                float radius;
+                float orbitRadius;
+                float angularSpeed;
+                float tint[3];
+            };
+            constexpr Body bodies[] = {
+                {0.72F, 0.0F, 0.0F, {1.0F, 0.78F, 0.36F}},
+                {0.22F, 1.65F, 0.75F, {0.72F, 0.58F, 0.42F}},
+                {0.34F, 2.55F, 0.42F, {0.42F, 0.72F, 1.0F}},
+                {0.28F, 3.55F, 0.26F, {0.92F, 0.42F, 0.28F}}
+            };
             glUseProgram(program);
-            glUniformMatrix4fv(viewProjectionLocation, 1, GL_FALSE, matrix.values.data());
+            glUniformMatrix4fv(viewProjectionLocation, 1, GL_FALSE, viewProjection.values.data());
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, albedoTexture);
             glUniform1i(albedoLocation, 0);
-            glUniform3f(albedoTintLocation, planetMaterial.albedoTint[0],
-                        planetMaterial.albedoTint[1], planetMaterial.albedoTint[2]);
             glUniform1f(ambientStrengthLocation, planetMaterial.ambientStrength);
             glUniform1f(diffuseStrengthLocation, planetMaterial.diffuseStrength);
             glUniform1f(uvScaleLocation, planetMaterial.uvScale);
             glBindVertexArray(vertexArray);
-            glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+            for (std::size_t i = 0; i < sizeof(bodies) / sizeof(bodies[0]); ++i) {
+                const Body& body = bodies[i];
+                const auto position = jassim::world::orbitalPosition(
+                    {body.orbitRadius, body.angularSpeed, 0.8F * static_cast<float>(i)}, elapsed);
+                auto model = jassim::math::Mat4::identity();
+                model.at(0, 0) = body.radius;
+                model.at(1, 1) = body.radius;
+                model.at(2, 2) = body.radius;
+                model.at(0, 3) = position.x;
+                model.at(1, 3) = position.y;
+                model.at(2, 3) = position.z;
+                glUniformMatrix4fv(modelLocation, 1, GL_FALSE, model.values.data());
+                glUniform3f(albedoTintLocation, body.tint[0], body.tint[1], body.tint[2]);
+                glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+            }
             glBindVertexArray(0);
         }
         eglSwapBuffers(display, surface);
@@ -266,7 +298,7 @@ struct AndroidRuntime {
             albedoTexture = 0;
             indexBuffer = vertexBuffer = vertexArray = program = 0;
             indexCount = 0;
-            viewProjectionLocation = albedoLocation = -1;
+            viewProjectionLocation = modelLocation = albedoLocation = -1;
             albedoTintLocation = ambientStrengthLocation = diffuseStrengthLocation = uvScaleLocation = -1;
             if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
             if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
