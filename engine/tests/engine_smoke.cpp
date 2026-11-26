@@ -6,6 +6,7 @@
 #include "jassim/platform/DeviceProfile.hpp"
 #include "jassim/platform/InputState.hpp"
 #include "jassim/render/Camera.hpp"
+#include "jassim/render/Mesh.hpp"
 #include "jassim/math/Mat4.hpp"
 
 #include <cassert>
@@ -31,6 +32,7 @@ int main() {
     using jassim::platform::QualityTier;
     using jassim::platform::InputState;
     using jassim::render::Camera;
+    using jassim::render::makeUvSphere;
     using jassim::math::Mat4;
 
     const Vec3 direction{3.0F, 0.0F, 4.0F};
@@ -109,6 +111,28 @@ int main() {
     camera.rotate(0.25F, 0.2F);
     assert(camera.forward().length() > 0.99F);
     assert(camera.viewProjection().at(3, 2) != 0.0F);
+
+    const auto sphere = makeUvSphere(2.0F, 16, 8);
+    assert(sphere.valid());
+    assert(sphere.vertices.size() == 17U * 9U);
+    assert(sphere.indices.size() == 16U * 8U * 6U);
+    for (const auto& vertex : sphere.vertices) {
+        const float normalLength = std::sqrt(
+            vertex.normal[0] * vertex.normal[0] +
+            vertex.normal[1] * vertex.normal[1] +
+            vertex.normal[2] * vertex.normal[2]);
+        assert(std::fabs(normalLength - 1.0F) < 1.0e-4F);
+        const float positionLength = std::sqrt(
+            vertex.position[0] * vertex.position[0] +
+            vertex.position[1] * vertex.position[1] +
+            vertex.position[2] * vertex.position[2]);
+        assert(std::fabs(positionLength - 2.0F) < 1.0e-4F);
+    }
+    for (const auto index : sphere.indices) {
+        assert(index < sphere.vertices.size());
+    }
+    assert(!makeUvSphere(0.0F, 16, 8).valid());
+    assert(!makeUvSphere(1.0F, 2, 8).valid());
 
     FrameClock clock;
     const auto normalFrame = clock.advance(1.0 / 30.0);
