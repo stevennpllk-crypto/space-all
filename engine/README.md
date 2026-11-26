@@ -2,7 +2,7 @@
 
 JASSIM Engine is an independent, mobile-first 3D engine project. It is not a Unity fork and does not use Unity runtime or editor code.
 
-## Current milestone: UV-mapped planet surface v0.9
+## Current milestone: reusable planet materials v0.10
 
 Implemented:
 - C++17 vector math (dot/cross), column-major 4x4 matrices, and scene/entity storage;
@@ -12,14 +12,15 @@ Implemented:
 - reusable indexed mesh data and a procedural UV-sphere generator;
 - position, normal and UV vertex attributes, indexed GPU buffers, depth testing and camera view-projection upload;
 - UV texture sampling with mipmapped filtering and a deterministic generated planetary albedo map;
+- reusable validated material parameters for albedo tint, ambient/diffuse lighting strength and UV scale, passed to the GLES shader at draw time;
 - per-fragment directional diffuse lighting with ambient contribution;
-- an initial blue sphere rendered using the procedural mesh pipeline;
+- a procedural planet sphere rendered with a configurable material through the mesh pipeline;
 - native multi-touch event forwarding for pointer down/move/up/cancel into the engine input state;
 - type-safe service registry, synchronous typed event bus, conservative device quality profiles, bounded fixed-step frame clock and fixed-capacity touch input;
 - portable CMake smoke tests, including sphere topology, vertex-normal and index-bound checks;
 - reproducible Android ARM64 debug APK packaging in GitHub Actions.
 
-The sphere is a procedural renderer milestone, not a finished planet system. External image asset loading, physically based materials, atmosphere, shadows, scene render queues, asset import, physics and editor tooling are not implemented yet.
+The sphere is a procedural renderer milestone, not a finished planet system. External image asset loading, physically based shading, atmosphere, shadows, scene render queues, asset import, physics and editor tooling are not implemented yet.
 
 The quality selector treats unknown device metrics conservatively. A device with 3 GB RAM is assigned the Low profile by design; this is a starting policy, not a measured performance guarantee.
 
@@ -45,7 +46,7 @@ ctest --test-dir build/engine --output-on-failure
 1. **Portable core** — math, scene/entity lifecycle, services, events, quality profiles, touch input and frame timing.
 2. **Android platform layer** — NativeActivity lifecycle, EGL surface/context and touch forwarding.
 3. **Procedural renderer** — indexed meshes, shaders, camera integration and directional lighting; initial UV sphere is implemented.
-4. **Planet materials** — UV coordinates and texture sampling are implemented; external asset loading and material parameters remain.
+4. **Planet materials** — UV coordinates, texture sampling and configurable basic material parameters are implemented; external asset loading and physically based shading remain.
 5. **Scene renderer** — reusable render components, render queues, resource cache and lighting extensions.
 6. **World systems** — scene serialization, basic physics and audio interfaces.
 7. **Editor** — lightweight project and scene authoring tools.
