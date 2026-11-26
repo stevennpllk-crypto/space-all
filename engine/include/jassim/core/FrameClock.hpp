@@ -21,7 +21,7 @@ public:
     static constexpr std::uint32_t MaxFixedSteps = 5;
 
     FrameTiming advance(double rawDeltaSeconds) noexcept {
-        double delta = std::isfinite(rawDeltaSeconds)
+        const double delta = std::isfinite(rawDeltaSeconds)
             ? std::clamp(rawDeltaSeconds, 0.0, MaxFrameDelta)
             : 0.0;
 
@@ -33,18 +33,17 @@ public:
         // Drop excess whole steps instead of allowing an unbounded catch-up spiral.
         if (steps == MaxFixedSteps && accumulator_ >= FixedStep) {
             accumulator_ = std::fmod(accumulator_, FixedStep);
+            if (accumulator_ >= FixedStep) accumulator_ -= FixedStep;
         }
 
-        return FrameTiming{
-            delta,
-            FixedStep,
-            steps,
-            accumulator_ / FixedStep
-        };
+        const double alpha = std::clamp(accumulator_ / FixedStep, 0.0, 0.999999999999);
+        return FrameTiming{delta, FixedStep, steps, alpha};
     }
 
     void reset() noexcept { accumulator_ = 0.0; }
-    double interpolationAlpha() const noexcept { return accumulator_ / FixedStep; }
+    double interpolationAlpha() const noexcept {
+        return std::clamp(accumulator_ / FixedStep, 0.0, 0.999999999999);
+    }
 
 private:
     double accumulator_{0.0};
