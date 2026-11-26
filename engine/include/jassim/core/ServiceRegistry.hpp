@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <utility>
 
 namespace jassim::core {
 
