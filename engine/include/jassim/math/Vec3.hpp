@@ -29,17 +29,31 @@ struct Vec3 {
         return x * x + y * y + z * z;
     }
 
-    float length() const {
-        return std::sqrt(lengthSquared());
-    }
+    float length() const { return std::sqrt(lengthSquared()); }
 
     Vec3 normalized() const {
         const float magnitude = length();
-        if (magnitude <= 1.0e-6F) {
-            return {};
-        }
+        if (magnitude <= 1.0e-6F) return {};
         return {x / magnitude, y / magnitude, z / magnitude};
     }
+
+    static constexpr float dot(const Vec3& a, const Vec3& b) noexcept {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+
+    static constexpr Vec3 cross(const Vec3& a, const Vec3& b) noexcept {
+        return {a.y * b.z - a.z * b.y,
+                a.z * b.x - a.x * b.z,
+                a.x * b.y - a.y * b.x};
+    }
 };
+
+inline constexpr float dot(const Vec3& a, const Vec3& b) noexcept {
+    return Vec3::dot(a, b);
+}
+
+inline constexpr Vec3 cross(const Vec3& a, const Vec3& b) noexcept {
+    return Vec3::cross(a, b);
+}
 
 } // namespace jassim::math
