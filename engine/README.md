@@ -2,12 +2,13 @@
 
 JASSIM Engine is an independent, mobile-first 3D engine project. It is not a Unity fork and does not use Unity runtime or editor code.
 
-## Current milestone: Android runtime foundation v0.6
+## Current milestone: Android runtime foundation v0.7
 
 Implemented:
 - C++17 vector math (dot/cross), column-major 4x4 matrices, and scene/entity storage;
 - a free-flight 3D camera with view, perspective projection, and local-space movement;
 - an Android NativeActivity entry point with EGL lifecycle handling and a minimal OpenGL ES 3 clear/swap loop;
+- native multi-touch event forwarding for pointer down/move/up/cancel into the engine input state;
 - an Android manifest declaring GLES 3.0 and the native engine library;
 - type-safe service registry with explicit shared ownership;
 - synchronous typed event bus with subscription removal;
@@ -44,7 +45,7 @@ ctest --test-dir build/engine --output-on-failure
 ## Planned milestones
 
 1. **Portable core** — math, scene/entity lifecycle, services, events, quality profiles, touch input, frame timing.
-2. **Android platform layer** — NativeActivity lifecycle, EGL surface/context, GLES3 frame loop; touch forwarding is next.
+2. **Android platform layer** — NativeActivity lifecycle, EGL surface/context, GLES3 frame loop; touch event forwarding is integrated; input mapping to game actions is next.
 3. **Renderer** — GLES shader programs, mesh buffers, camera integration, depth and lighting.
 4. **3D content** — sphere/mesh primitives, materials, texture loading and asset manifest.
 5. **World systems** — scene serialization, resource cache, basic physics and audio interfaces.
