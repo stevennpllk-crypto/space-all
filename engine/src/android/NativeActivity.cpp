@@ -20,9 +20,12 @@ constexpr const char* kLogTag = "JASSIM.Engine";
 constexpr const char* kVertexShader = R"(#version 300 es
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
+layout(location = 2) in vec2 aUv;
 uniform mat4 uViewProjection;
 out vec3 vNormal;
+out vec2 vUv;
 void main() {
+    vUv = aUv;
     gl_Position = uViewProjection * vec4(aPosition, 1.0);
     vNormal = aNormal;
 })";
@@ -30,14 +33,16 @@ void main() {
 constexpr const char* kFragmentShader = R"(#version 300 es
 precision mediump float;
 in vec3 vNormal;
-uniform vec3 uBaseColor;
+in vec2 vUv;
+uniform sampler2D uAlbedo;
 out vec4 outColor;
 void main() {
     vec3 normal = normalize(vNormal);
     vec3 lightDirection = normalize(vec3(-0.45, 0.65, 0.60));
     float diffuse = max(dot(normal, lightDirection), 0.0);
     float illumination = 0.18 + diffuse * 0.82;
-    outColor = vec4(uBaseColor * illumination, 1.0);
+    vec3 albedo = texture(uAlbedo, vUv).rgb;
+    outColor = vec4(albedo * illumination, 1.0);
 })";
 
 GLuint compileShader(GLenum type, const char* source) {
@@ -97,9 +102,11 @@ struct AndroidRuntime {
     GLuint vertexArray{0};
     GLuint vertexBuffer{0};
     GLuint indexBuffer{0};
+    GLuint albedoTexture{0};
     GLsizei indexCount{0};
     GLint viewProjectionLocation{-1};
     GLint baseColorLocation{-1};
+    GLint albedoLocation{-1};
     jassim::platform::InputState input{};
     jassim::render::Camera camera{};
 
@@ -107,7 +114,7 @@ struct AndroidRuntime {
         program = createProgram();
         if (program == 0) return false;
         viewProjectionLocation = glGetUniformLocation(program, "uViewProjection");
-        baseColorLocation = glGetUniformLocation(program, "uBaseColor");
+        albedoLocation = glGetUniformLocation(program, "uAlbedo");
 
         const auto sphere = jassim::render::makeUvSphere(1.25F, 40, 28);
         if (!sphere.valid() || sphere.indices.size() >
@@ -135,7 +142,46 @@ struct AndroidRuntime {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(jassim::render::MeshVertex),
                               reinterpret_cast<void*>(offsetof(jassim::render::MeshVertex, normal)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(jassim::render::MeshVertex),
+                              reinterpret_cast<void*>(offsetof(jassim::render::MeshVertex, uv)));
         glBindVertexArray(0);
+
+        // Small generated albedo map: deterministic bands and continent-like regions.
+        constexpr int textureWidth = 256;
+        constexpr int textureHeight = 128;
+        std::uint8_t pixels[textureWidth * textureHeight * 3]{};
+        for (int y = 0; y < textureHeight; ++y) {
+            const float latitude = (static_cast<float>(y) / textureHeight - 0.5F) * 3.14159265F;
+            for (int x = 0; x < textureWidth; ++x) {
+                const float u = static_cast<float>(x) / textureWidth;
+                const float v = static_cast<float>(y) / textureHeight;
+                const float field = std::sin(u * 18.0F + std::sin(v * 11.0F) * 2.2F) +
+                                    0.55F * std::sin(u * 37.0F - v * 19.0F) +
+                                    0.25F * std::cos(u * 71.0F + v * 43.0F);
+                const bool land = field > 0.42F && std::fabs(latitude) < 1.35F;
+                const bool ice = std::fabs(latitude) > 1.22F;
+                const std::size_t offset = static_cast<std::size_t>((y * textureWidth + x) * 3);
+                if (ice) {
+                    pixels[offset] = 190; pixels[offset + 1] = 218; pixels[offset + 2] = 235;
+                } else if (land) {
+                    pixels[offset] = 72; pixels[offset + 1] = 142; pixels[offset + 2] = 78;
+                } else {
+                    pixels[offset] = 24; pixels[offset + 1] = 91; pixels[offset + 2] = 166;
+                }
+            }
+        }
+        glGenTextures(1, &albedoTexture);
+        glBindTexture(GL_TEXTURE_2D, albedoTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
         glEnable(GL_DEPTH_TEST);
         return glGetError() == GL_NO_ERROR;
     }
@@ -199,7 +245,9 @@ struct AndroidRuntime {
             const auto matrix = camera.viewProjection();
             glUseProgram(program);
             glUniformMatrix4fv(viewProjectionLocation, 1, GL_FALSE, matrix.values.data());
-            glUniform3f(baseColorLocation, 0.16F, 0.48F, 0.92F);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, albedoTexture);
+            glUniform1i(albedoLocation, 0);
             glBindVertexArray(vertexArray);
             glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
             glBindVertexArray(0);
@@ -210,13 +258,15 @@ struct AndroidRuntime {
     void shutdown() {
         if (display != EGL_NO_DISPLAY) {
             eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            if (albedoTexture) glDeleteTextures(1, &albedoTexture);
             if (indexBuffer) glDeleteBuffers(1, &indexBuffer);
             if (vertexBuffer) glDeleteBuffers(1, &vertexBuffer);
             if (vertexArray) glDeleteVertexArrays(1, &vertexArray);
             if (program) glDeleteProgram(program);
+            albedoTexture = 0;
             indexBuffer = vertexBuffer = vertexArray = program = 0;
             indexCount = 0;
-            viewProjectionLocation = baseColorLocation = -1;
+            viewProjectionLocation = albedoLocation = -1;
             if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
             if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
             eglTerminate(display);
