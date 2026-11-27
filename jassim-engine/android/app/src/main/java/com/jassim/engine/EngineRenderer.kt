@@ -2,6 +2,7 @@ package com.jassim.engine
 
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
+import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -19,6 +20,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES30.glClearColor(0.035f, 0.055f, 0.12f, 1.0f)
+        Log.i("JASSIM_ENGINE", "${NativeBridge.nativeEngineVersion()} rootNode=${NativeBridge.nativeCreateRootNode()}")
         val vertexShader = compileShader(GLES30.GL_VERTEX_SHADER,
             "#version 300 es\nlayout(location=0) in vec3 aPosition;\nvoid main(){ gl_Position=vec4(aPosition,1.0); }")
         val fragmentShader = compileShader(GLES30.GL_FRAGMENT_SHADER,
@@ -48,10 +50,11 @@ class EngineRenderer : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
         if (program == 0) return
+        val buffer = vertexBuffer ?: return
         GLES30.glUseProgram(program)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
         GLES30.glEnableVertexAttribArray(0)
-        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 0, vertexBuffer)
+        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 0, buffer)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3)
         GLES30.glDisableVertexAttribArray(0)
     }
