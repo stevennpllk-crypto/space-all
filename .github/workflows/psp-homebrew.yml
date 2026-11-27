@@ -21,12 +21,14 @@ jobs:
           make clean || true
           make
           test -s EBOOT.PBP
+          file EBOOT.PBP
       - name: Prepare PPSSPP folder
         run: |
           mkdir -p build/PSP/GAME/SOLAR_EXPLORER
           cp PSPHomebrew/EBOOT.PBP build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
           cd build
           zip -r SOLAR_EXPLORER_PPSSPP.zip PSP
+          test -s SOLAR_EXPLORER_PPSSPP.zip
       - name: Upload EBOOT and PPSSPP package
         uses: actions/upload-artifact@v4
         with:
