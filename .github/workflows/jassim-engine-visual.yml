@@ -1,0 +1,67 @@
+name: JASSIM ENGINE visual emulator test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["engine/**"]
+    paths:
+      - "jassim-engine/**"
+      - ".github/workflows/jassim-engine-visual.yml"
+
+jobs:
+  android-visual-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Install Android build packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
+
+      - name: Build debug APK
+        working-directory: jassim-engine/android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Launch Android emulator and capture app screen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am force-stop com.jassim.engine || true
+            adb shell am start -n com.jassim.engine/.MainActivity
+            sleep 12
+            mkdir -p visual-output
+            adb exec-out screencap -p > visual-output/jassim-engine-screen.png
+            adb logcat -d -t 2500 > visual-output/logcat.txt
+            adb shell dumpsys activity activities > visual-output/activity.txt
+            test -s visual-output/jassim-engine-screen.png
+
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jassim-engine-visual-evidence
+          path: |
+            visual-output/
+            jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
