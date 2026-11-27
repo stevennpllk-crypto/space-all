@@ -10,6 +10,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = Solar Explorer PSP
+PSPSDK := $(shell psp-config --pspsdk-path)
 
 LIBS = -lpspgu -lpspgum -lpspge -lpspdisplay -lpspctrl -lm
 
