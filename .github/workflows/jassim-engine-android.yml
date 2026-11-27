@@ -31,6 +31,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+      - name: Cache Android SDK packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/platforms
+            ${{ env.ANDROID_HOME }}/build-tools
+            ${{ env.ANDROID_HOME }}/cmake
+            ${{ env.ANDROID_HOME }}/ndk
+          key: ${{ runner.os }}-android-sdk-35-cmake-3.22.1-ndk-27.2.12479018
       - name: Install Android build tools
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
       - name: Build debug APK
@@ -49,7 +58,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           emulator-boot-timeout: 900
           disable-animations: true
           script: |
@@ -61,11 +70,10 @@ jobs:
             test "$(adb get-state)" = "device"
             adb shell settings put system accelerometer_rotation 0
             adb shell settings put system user_rotation 1
-            sleep 8
             adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am force-stop com.jassim.engine || true
             adb shell am start -n com.jassim.engine/.MainActivity
-            sleep 15
+            sleep 5
             adb shell pidof com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/app-pid.txt"
             adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/visual-output/activity.txt"
             grep -q "com.jassim.engine/.MainActivity" "$GITHUB_WORKSPACE/visual-output/activity.txt"
