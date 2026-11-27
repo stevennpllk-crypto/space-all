@@ -38,6 +38,8 @@ jobs:
         run: gradle --no-daemon assembleDebug
       - name: Launch emulator and capture app screen
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          ANDROID_I_WANT_MY_TCG: "yes"
         with:
           api-level: 35
           target: google_apis
