@@ -1,4 +1,4 @@
-name: JASSIM ENGINE Android build
+name: JASSIM ENGINE Android build and visual test
 on:
   push:
     branches: ["engine/**"]
@@ -16,8 +16,9 @@ on:
       - "jassim-engine/CMakeLists.txt"
       - ".github/workflows/jassim-engine-android.yml"
 jobs:
-  assemble-debug:
+  assemble-debug-and-visual-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -35,8 +36,30 @@ jobs:
       - name: Build debug APK
         working-directory: jassim-engine/android
         run: gradle --no-daemon assembleDebug
-      - name: Upload debug APK
+      - name: Launch emulator and capture app screen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/visual-output"
+            adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am force-stop com.jassim.engine || true
+            adb shell am start -n com.jassim.engine/.MainActivity
+            sleep 12
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
+            adb logcat -d -t 2500 > "$GITHUB_WORKSPACE/visual-output/logcat.txt"
+            adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/visual-output/activity.txt"
+            test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
+      - name: Upload APK and visual evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jassim-engine-debug-apk
-          path: jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
+          name: jassim-engine-apk-and-visual-evidence
+          path: |
+            jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
+            visual-output/
+          if-no-files-found: warn
