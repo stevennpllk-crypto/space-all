@@ -1,14 +1,16 @@
-name: JASSIM ENGINE core checks
+name: JASSIM ENGINE checks
 on:
   push:
     branches: ["engine/**"]
     paths:
       - "jassim-engine/**"
       - ".github/workflows/jassim-engine-core.yml"
+      - ".github/workflows/jassim-engine-android.yml"
   pull_request:
     paths:
       - "jassim-engine/**"
       - ".github/workflows/jassim-engine-core.yml"
+      - ".github/workflows/jassim-engine-android.yml"
 jobs:
   native-core:
     runs-on: ubuntu-latest
