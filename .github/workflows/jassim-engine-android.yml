@@ -77,9 +77,15 @@ jobs:
             adb shell pidof com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/app-pid.txt"
             adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/visual-output/activity.txt"
             grep -q "com.jassim.engine/.MainActivity" "$GITHUB_WORKSPACE/visual-output/activity.txt"
+            # Exercise the single-finger orbit gesture and verify the renderer stays alive.
+            adb shell input swipe 300 500 700 620 600
+            sleep 1
+            adb shell pidof com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt"
+            test -s "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt"
             adb shell dumpsys gfxinfo com.jassim.engine framestats > "$GITHUB_WORKSPACE/visual-output/gfxinfo.txt"
             adb shell dumpsys meminfo com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/meminfo.txt"
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             adb logcat -d -t 5000 > "$GITHUB_WORKSPACE/visual-output/logcat.txt"
             test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
       - name: Upload APK and visual evidence
