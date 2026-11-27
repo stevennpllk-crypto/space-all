@@ -10,7 +10,7 @@ on:
 
 jobs:
   android-visual-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
@@ -26,7 +26,7 @@ jobs:
           java-version: "17"
 
       - name: Accept Android SDK licenses
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
