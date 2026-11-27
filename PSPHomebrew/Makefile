@@ -1,0 +1,17 @@
+TARGET = EBOOT
+OBJS = src/main.o
+
+INCDIR =
+CFLAGS = -O2 -G0 -Wall
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+ASFLAGS = $(CFLAGS)
+
+BUILD_PRX = 1
+PSP_FW_VERSION = 660
+EXTRA_TARGETS = EBOOT.PBP
+PSP_EBOOT_TITLE = Solar Explorer PSP
+PSPSDK := $(shell psp-config --pspsdk-path)
+
+LIBS = -lpspgu -lpspgum -lpspge -lpspdisplay -lpspctrl -lm
+
+include $(shell psp-config --pspsdk-path)/lib/build.mak

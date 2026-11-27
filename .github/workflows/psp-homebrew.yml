@@ -1,0 +1,36 @@
+name: Build Solar Explorer PSP Homebrew
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master, "feature/ppsspp-homebrew"]
+    paths:
+      - "PSPHomebrew/**"
+      - ".github/workflows/psp-homebrew.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile PSP executable
+        working-directory: PSPHomebrew
+        run: |
+          make clean || true
+          make
+          test -s EBOOT.PBP
+      - name: Prepare PPSSPP install folder
+        run: |
+          mkdir -p build/PSP/GAME/SOLAR_EXPLORER
+          cp PSPHomebrew/EBOOT.PBP build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
+          test -s build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
+      - name: Upload EBOOT and PPSSPP folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: SOLAR-EXPLORER-PPSSPP
+          path: |
+            PSPHomebrew/EBOOT.PBP
+            build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
+          if-no-files-found: error
