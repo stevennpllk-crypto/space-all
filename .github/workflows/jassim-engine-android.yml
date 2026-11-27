@@ -77,17 +77,20 @@ jobs:
             adb shell pidof com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/app-pid.txt"
             adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/visual-output/activity.txt"
             grep -q "com.jassim.engine/.MainActivity" "$GITHUB_WORKSPACE/visual-output/activity.txt"
-            # Exercise the single-finger orbit gesture and verify the renderer stays alive.
+            # Capture a true baseline before exercising the single-finger orbit gesture.
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
+            test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
+            # Exercise the orbit gesture and verify the same app process remains alive.
             adb shell input swipe 300 500 700 620 600
             sleep 1
             adb shell pidof com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt"
             test -s "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt"
+            test "$(cat "$GITHUB_WORKSPACE/visual-output/app-pid.txt")" = "$(cat "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt")"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
+            test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             adb shell dumpsys gfxinfo com.jassim.engine framestats > "$GITHUB_WORKSPACE/visual-output/gfxinfo.txt"
             adb shell dumpsys meminfo com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/meminfo.txt"
-            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
-            adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             adb logcat -d -t 5000 > "$GITHUB_WORKSPACE/visual-output/logcat.txt"
-            test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png"
       - name: Upload APK and visual evidence
         if: always()
         uses: actions/upload-artifact@v4
