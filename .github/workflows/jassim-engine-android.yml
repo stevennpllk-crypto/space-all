@@ -57,17 +57,8 @@ jobs:
             mkdir -p "$GITHUB_WORKSPACE/visual-output"
             adb devices
             adb wait-for-device
-            for attempt in $(seq 1 60); do
-              state="$(adb get-state 2>/dev/null || true)"
-              if [ "$state" = "device" ]; then
-                break
-              fi
-              sleep 2
-            done
+            adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 2; done'
             test "$(adb get-state)" = "device"
-            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
-              sleep 2
-            done
             adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am force-stop com.jassim.engine || true
             adb shell am start -n com.jassim.engine/.MainActivity
