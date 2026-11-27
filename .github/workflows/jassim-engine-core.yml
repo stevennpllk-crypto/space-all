@@ -1,0 +1,22 @@
+name: JASSIM ENGINE core checks
+on:
+  push:
+    branches: ["engine/**"]
+    paths:
+      - "jassim-engine/**"
+      - ".github/workflows/jassim-engine-core.yml"
+  pull_request:
+    paths:
+      - "jassim-engine/**"
+      - ".github/workflows/jassim-engine-core.yml"
+jobs:
+  native-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S jassim-engine -B jassim-engine/build -DJASSIM_ENGINE_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build jassim-engine/build --parallel 2
+      - name: Test
+        run: ctest --test-dir jassim-engine/build --output-on-failure
