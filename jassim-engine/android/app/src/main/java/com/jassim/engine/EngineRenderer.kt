@@ -20,19 +20,48 @@ class EngineRenderer : GLSurfaceView.Renderer {
     private var surfaceHeight = 1
     private val startTime = System.nanoTime()
 
+    // Each face owns four vertices so its material color stays independent.
+    // Vertex layout: position (xyz), face color (rgb).
     private val vertices = floatArrayOf(
-        -0.6f, -0.6f,  0.6f,   0.6f, -0.6f,  0.6f,
-         0.6f,  0.6f,  0.6f,  -0.6f,  0.6f,  0.6f,
-        -0.6f, -0.6f, -0.6f,   0.6f, -0.6f, -0.6f,
-         0.6f,  0.6f, -0.6f,  -0.6f,  0.6f, -0.6f
+        // Front (+Z): blue
+        -0.6f, -0.6f,  0.6f, 0.18f, 0.55f, 1.00f,
+         0.6f, -0.6f,  0.6f, 0.18f, 0.55f, 1.00f,
+         0.6f,  0.6f,  0.6f, 0.18f, 0.55f, 1.00f,
+        -0.6f,  0.6f,  0.6f, 0.18f, 0.55f, 1.00f,
+        // Back (-Z): deep blue
+         0.6f, -0.6f, -0.6f, 0.08f, 0.22f, 0.55f,
+        -0.6f, -0.6f, -0.6f, 0.08f, 0.22f, 0.55f,
+        -0.6f,  0.6f, -0.6f, 0.08f, 0.22f, 0.55f,
+         0.6f,  0.6f, -0.6f, 0.08f, 0.22f, 0.55f,
+        // Left (-X): cyan
+        -0.6f, -0.6f, -0.6f, 0.12f, 0.72f, 0.88f,
+        -0.6f, -0.6f,  0.6f, 0.12f, 0.72f, 0.88f,
+        -0.6f,  0.6f,  0.6f, 0.12f, 0.72f, 0.88f,
+        -0.6f,  0.6f, -0.6f, 0.12f, 0.72f, 0.88f,
+        // Right (+X): violet
+         0.6f, -0.6f,  0.6f, 0.48f, 0.30f, 0.92f,
+         0.6f, -0.6f, -0.6f, 0.48f, 0.30f, 0.92f,
+         0.6f,  0.6f, -0.6f, 0.48f, 0.30f, 0.92f,
+         0.6f,  0.6f,  0.6f, 0.48f, 0.30f, 0.92f,
+        // Top (+Y): light blue
+        -0.6f,  0.6f,  0.6f, 0.48f, 0.76f, 1.00f,
+         0.6f,  0.6f,  0.6f, 0.48f, 0.76f, 1.00f,
+         0.6f,  0.6f, -0.6f, 0.48f, 0.76f, 1.00f,
+        -0.6f,  0.6f, -0.6f, 0.48f, 0.76f, 1.00f,
+        // Bottom (+/-Y): dark indigo
+        -0.6f, -0.6f, -0.6f, 0.10f, 0.16f, 0.38f,
+         0.6f, -0.6f, -0.6f, 0.10f, 0.16f, 0.38f,
+         0.6f, -0.6f,  0.6f, 0.10f, 0.16f, 0.38f,
+        -0.6f, -0.6f,  0.6f, 0.10f, 0.16f, 0.38f
     )
+
     private val indices = shortArrayOf(
-        0, 1, 2, 0, 2, 3,
-        5, 4, 7, 5, 7, 6,
-        4, 0, 3, 4, 3, 7,
-        1, 5, 6, 1, 6, 2,
-        3, 2, 6, 3, 6, 7,
-        4, 5, 1, 4, 1, 0
+         0,  1,  2,  0,  2,  3,
+         4,  5,  6,  4,  6,  7,
+         8,  9, 10,  8, 10, 11,
+        12, 13, 14, 12, 14, 15,
+        16, 17, 18, 16, 18, 19,
+        20, 21, 22, 20, 22, 23
     )
 
     private val projection = FloatArray(16)
@@ -45,12 +74,15 @@ class EngineRenderer : GLSurfaceView.Renderer {
         GLES30.glClearColor(0.035f, 0.055f, 0.12f, 1.0f)
         GLES30.glEnable(GLES30.GL_DEPTH_TEST)
         GLES30.glDepthFunc(GLES30.GL_LEQUAL)
+        GLES30.glEnable(GLES30.GL_CULL_FACE)
+        GLES30.glCullFace(GLES30.GL_BACK)
+        GLES30.glFrontFace(GLES30.GL_CCW)
         Log.i("JASSIM_ENGINE", "${NativeBridge.nativeEngineVersion()} rootNode=${NativeBridge.nativeCreateRootNode()}")
 
         val vertexShader = compileShader(GLES30.GL_VERTEX_SHADER,
-            "#version 300 es\nlayout(location=0) in vec3 aPosition;\nuniform mat4 uMvp;\nvoid main(){ gl_Position=uMvp*vec4(aPosition,1.0); }")
+            "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aColor;\nuniform mat4 uMvp;\nout vec3 vColor;\nvoid main(){ gl_Position=uMvp*vec4(aPosition,1.0); vColor=aColor; }")
         val fragmentShader = compileShader(GLES30.GL_FRAGMENT_SHADER,
-            "#version 300 es\nprecision mediump float;\nout vec4 outColor;\nvoid main(){ outColor=vec4(0.18,0.55,1.0,1.0); }")
+            "#version 300 es\nprecision mediump float;\nin vec3 vColor;\nout vec4 outColor;\nvoid main(){ outColor=vec4(vColor,1.0); }")
         program = GLES30.glCreateProgram()
         GLES30.glAttachShader(program, vertexShader)
         GLES30.glAttachShader(program, fragmentShader)
@@ -107,10 +139,14 @@ class EngineRenderer : GLSurfaceView.Renderer {
         GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp, 0)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vertexBufferId)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, indexBufferId)
+        val stride = 6 * 4
         GLES30.glEnableVertexAttribArray(0)
-        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 3 * 4, 0)
+        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, stride, 0)
+        GLES30.glEnableVertexAttribArray(1)
+        GLES30.glVertexAttribPointer(1, 3, GLES30.GL_FLOAT, false, stride, 3 * 4)
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, indices.size, GLES30.GL_UNSIGNED_SHORT, 0)
         GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
