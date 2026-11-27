@@ -31,10 +31,10 @@ A native PSP Homebrew game prototype for PPSSPP, developed separately from the U
 This is an early 3D rendering/gameplay milestone, not a finished commercial game. The mission state and language toggle are currently runtime state only; mission objectives, visible bilingual text, Arabic shaping/font atlas, planet surface textures, landing, save data, and sound still need implementation. Planet distances and sizes are compressed for readability and are not to scale.
 
 ## Build
-The GitHub Actions workflow `.github/workflows/psp-homebrew.yml` uses PSPDEV/PSPSDK. A successful workflow must produce `EBOOT.PBP` before the game can be tested in PPSSPP.
+The GitHub Actions workflow `.github/workflows/psp-homebrew.yml` uses PSPDEV/PSPSDK. It uploads `EBOOT.PBP` and a folder artifact preserving the PPSSPP install path. A successful workflow must produce a non-empty `EBOOT.PBP` before the game can be tested in PPSSPP.
 
 ## Install in PPSSPP
-Extract the workflow ZIP to preserve:
+Download the workflow artifact and copy the file from `build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP` to your PPSSPP storage path:
 `PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP`
 
 The Unity 6 project remains untouched in the parent repository. This PSP implementation is isolated under `PSPHomebrew/`.
