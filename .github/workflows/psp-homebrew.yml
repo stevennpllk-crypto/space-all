@@ -21,7 +21,6 @@ jobs:
           make clean || true
           make
           test -s EBOOT.PBP
-          file EBOOT.PBP
       - name: Prepare PPSSPP folder
         run: |
           mkdir -p build/PSP/GAME/SOLAR_EXPLORER
