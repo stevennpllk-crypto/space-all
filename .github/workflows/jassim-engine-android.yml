@@ -65,7 +65,7 @@ jobs:
               sleep 2
             done
             test "$(adb get-state)" = "device"
-            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')" = "1" ]; do
+            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
               sleep 2
             done
             adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
