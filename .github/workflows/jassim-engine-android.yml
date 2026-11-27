@@ -36,10 +36,14 @@ jobs:
       - name: Build debug APK
         working-directory: jassim-engine/android
         run: gradle --no-daemon assembleDebug
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
       - name: Launch emulator and capture app screen
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          ANDROID_I_WANT_MY_TCG: "yes"
         with:
           api-level: 35
           target: google_apis
@@ -53,7 +57,17 @@ jobs:
             mkdir -p "$GITHUB_WORKSPACE/visual-output"
             adb devices
             adb wait-for-device
-            adb shell getprop sys.boot_completed
+            for attempt in $(seq 1 60); do
+              state="$(adb get-state 2>/dev/null || true)"
+              if [ "$state" = "device" ]; then
+                break
+              fi
+              sleep 2
+            done
+            test "$(adb get-state)" = "device"
+            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r')" = "1" ]; do
+              sleep 2
+            done
             adb install -r jassim-engine/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am force-stop com.jassim.engine || true
             adb shell am start -n com.jassim.engine/.MainActivity
