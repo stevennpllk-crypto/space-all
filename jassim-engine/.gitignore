@@ -1,0 +1,11 @@
+build/
+cmake-build-*/
+.gradle/
+.idea/
+.vscode/
+*.o
+*.a
+*.so
+*.apk
+*.aab
+.DS_Store
