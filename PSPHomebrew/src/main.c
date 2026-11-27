@@ -150,7 +150,8 @@ static void init_graphics(void) {
     sceGuScissor(0,0,SW,SH);
     sceGuEnable(GU_SCISSOR_TEST);
     sceGuEnable(GU_DEPTH_TEST);
-    sceGuDepthFunc(GU_LEQUAL);
+    sceGuDepthRange(65535,0);
+    sceGuDepthFunc(GU_GEQUAL);
     sceGuDisable(GU_CULL_FACE);
     sceGuShadeModel(GU_SMOOTH);
     sceGuClearColor(0xFF030612);
@@ -210,6 +211,22 @@ static void draw_scene(void) {
         float x=cosf(a)*orbit_radius[i];
         float z=sinf(a)*orbit_radius[i];
         draw_sphere(x,0.0f,z,planet_size[i],planet_color[i],orbit_time*0.18f+i);
+        if(i==selected_planet) {
+            Vertex target_ring[33];
+            float rr=planet_size[i]+0.48f;
+            for(int j=0;j<33;j++) {
+                float t=2.0f*PI*(float)j/32.0f;
+                target_ring[j].color=mission_mode?0xFFFFB34D:0xFF65D9FF;
+                target_ring[j].x=x+cosf(t)*rr;
+                target_ring[j].y=0.10f;
+                target_ring[j].z=z+sinf(t)*rr;
+            }
+            sceGuDrawArray(GU_LINE_STRIP,GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D,33,0,target_ring);
+            if(mission_mode) {
+                Vertex route[2]={{0xFFFFB34D,ship_x,0.12f,ship_z},{0xFFFFB34D,x,0.12f,z}};
+                sceGuDrawArray(GU_LINES,GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D,2,0,route);
+            }
+        }
         if(i==5) {
             /* Saturn-like ring, shown as a thin elliptical wire orbit. */
             Vertex ring[49];
