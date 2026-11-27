@@ -21,18 +21,16 @@ jobs:
           make clean || true
           make
           test -s EBOOT.PBP
-      - name: Prepare PPSSPP folder
+      - name: Prepare PPSSPP install folder
         run: |
           mkdir -p build/PSP/GAME/SOLAR_EXPLORER
           cp PSPHomebrew/EBOOT.PBP build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
-          cd build
-          zip -r SOLAR_EXPLORER_PPSSPP.zip PSP
-          test -s SOLAR_EXPLORER_PPSSPP.zip
-      - name: Upload EBOOT and PPSSPP package
+          test -s build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
+      - name: Upload EBOOT and PPSSPP folder
         uses: actions/upload-artifact@v4
         with:
           name: SOLAR-EXPLORER-PPSSPP
           path: |
             PSPHomebrew/EBOOT.PBP
-            build/SOLAR_EXPLORER_PPSSPP.zip
+            build/PSP/GAME/SOLAR_EXPLORER/EBOOT.PBP
           if-no-files-found: error
