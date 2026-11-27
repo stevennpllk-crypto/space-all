@@ -28,8 +28,15 @@ class EngineSurfaceView(context: Context) : GLSurfaceView(context) {
         scaleDetector.onTouchEvent(event)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                previousX = event.x
-                previousY = event.y
+                previousX = event.getX(0)
+                previousY = event.getY(0)
+            }
+            MotionEvent.ACTION_POINTER_UP -> {
+                val remainingPointer = if (event.actionIndex == 0) 1 else 0
+                if (remainingPointer < event.pointerCount) {
+                    previousX = event.getX(remainingPointer)
+                    previousY = event.getY(remainingPointer)
+                }
             }
             MotionEvent.ACTION_MOVE -> {
                 if (event.pointerCount == 1 && !scaleDetector.isInProgress) {
