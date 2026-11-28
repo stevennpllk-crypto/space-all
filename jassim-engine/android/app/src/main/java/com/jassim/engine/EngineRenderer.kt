@@ -19,20 +19,11 @@ class EngineRenderer : GLSurfaceView.Renderer {
     private var surfaceWidth = 1
     private var surfaceHeight = 1
     private val startTime = System.nanoTime()
-    @Volatile private var userRotationX = -18.0f
-    @Volatile private var userRotationY = 0.0f
-    @Volatile private var cameraDistance = 2.8f
+    private val camera = EngineCamera()
 
-    fun rotateBy(deltaX: Float, deltaY: Float) {
-        userRotationY += deltaX
-        userRotationX = (userRotationX + deltaY).coerceIn(-85.0f, 85.0f)
-    }
+    fun rotateBy(deltaX: Float, deltaY: Float) = camera.rotateBy(deltaX, deltaY)
 
-    fun zoomBy(scaleFactor: Float) {
-        if (scaleFactor.isFinite() && scaleFactor > 0.0f) {
-            cameraDistance = (cameraDistance / scaleFactor).coerceIn(1.7f, 6.0f)
-        }
-    }
+    fun zoomBy(scaleFactor: Float) = camera.zoomBy(scaleFactor)
 
     // Each face owns four vertices so its material color stays independent.
     // Vertex layout: position (xyz), face color (rgb).
@@ -143,10 +134,13 @@ class EngineRenderer : GLSurfaceView.Renderer {
         if (program == 0 || vertexBufferId == 0 || indexBufferId == 0) return
 
         val elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0f
+        val cameraDistance = camera.distance
+        val rotationX = camera.rotationX
+        val rotationY = camera.rotationY
         Matrix.setLookAtM(view, 0, 0.0f, 0.0f, cameraDistance, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f)
         Matrix.setIdentityM(model, 0)
-        Matrix.rotateM(model, 0, userRotationY + elapsedSeconds * 18.0f, 0.0f, 1.0f, 0.0f)
-        Matrix.rotateM(model, 0, userRotationX, 1.0f, 0.0f, 0.0f)
+        Matrix.rotateM(model, 0, rotationY + elapsedSeconds * 18.0f, 0.0f, 1.0f, 0.0f)
+        Matrix.rotateM(model, 0, rotationX, 1.0f, 0.0f, 0.0f)
         Matrix.multiplyMM(viewModel, 0, view, 0, model, 0)
         Matrix.multiplyMM(mvp, 0, projection, 0, viewModel, 0)
 
