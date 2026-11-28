@@ -89,10 +89,7 @@ jobs:
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             # A successful orbit gesture must change the rendered frame.
-            if cmp -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png" "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"; then
-              echo "Orbit gesture did not change the rendered frame"
-              exit 1
-            fi
+            cmp -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-screen.png" "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png" && { echo "Orbit gesture did not change the rendered frame"; exit 1; } || test "$?" -ne 0
             # Reset frame statistics, then collect a longer steady-state sample.
             adb shell dumpsys gfxinfo com.jassim.engine reset
             sleep 5
