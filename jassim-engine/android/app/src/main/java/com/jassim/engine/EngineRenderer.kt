@@ -78,6 +78,8 @@ class EngineRenderer : GLSurfaceView.Renderer {
         indices = IntArray(indices.size) { i -> indices[i].toInt() and 0xffff }
     )
 
+    private val meshIndexCount = mesh.indices.size
+
     private val projection = FloatArray(16)
     private val view = FloatArray(16)
     private val model = FloatArray(16)
@@ -174,7 +176,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
         GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, stride, 0)
         GLES30.glEnableVertexAttribArray(1)
         GLES30.glVertexAttribPointer(1, 3, GLES30.GL_FLOAT, false, stride, 3 * 4)
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, meshIndices.size, GLES30.GL_UNSIGNED_SHORT, 0)
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, meshIndexCount, GLES30.GL_UNSIGNED_SHORT, 0)
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
