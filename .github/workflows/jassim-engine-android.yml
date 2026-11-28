@@ -88,6 +88,9 @@ jobs:
             test "$(cat "$GITHUB_WORKSPACE/visual-output/app-pid.txt")" = "$(cat "$GITHUB_WORKSPACE/visual-output/app-pid-after-orbit.txt")"
             adb exec-out screencap -p > "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
             test -s "$GITHUB_WORKSPACE/visual-output/jassim-engine-after-orbit.png"
+            # Reset frame statistics, then collect a longer steady-state sample.
+            adb shell dumpsys gfxinfo com.jassim.engine reset
+            sleep 5
             adb shell dumpsys gfxinfo com.jassim.engine framestats > "$GITHUB_WORKSPACE/visual-output/gfxinfo.txt"
             adb shell dumpsys meminfo com.jassim.engine > "$GITHUB_WORKSPACE/visual-output/meminfo.txt"
             adb logcat -d -t 5000 > "$GITHUB_WORKSPACE/visual-output/logcat.txt"
