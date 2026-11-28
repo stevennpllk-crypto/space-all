@@ -16,6 +16,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
     private var vertexBufferId = 0
     private var indexBufferId = 0
     private var mvpLocation = -1
+    private var modelLocation = -1
     private var surfaceWidth = 1
     private var surfaceHeight = 1
     private val startTime = System.nanoTime()
@@ -85,9 +86,9 @@ class EngineRenderer : GLSurfaceView.Renderer {
         Log.i("JASSIM_ENGINE", "${NativeBridge.nativeEngineVersion()} rootNode=${NativeBridge.nativeCreateRootNode()}")
 
         val vertexShader = compileShader(GLES30.GL_VERTEX_SHADER,
-            "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aColor;\nuniform mat4 uMvp;\nout vec3 vColor;\nvoid main(){ gl_Position=uMvp*vec4(aPosition,1.0); vColor=aColor; }")
+            "#version 300 es\nlayout(location=0) in vec3 aPosition;\nlayout(location=1) in vec3 aColor;\nuniform mat4 uMvp;\nuniform mat4 uModel;\nout vec3 vColor;\nout vec3 vWorldPosition;\nvoid main(){ vec4 world=uModel*vec4(aPosition,1.0); vWorldPosition=world.xyz; vColor=aColor; gl_Position=uMvp*vec4(aPosition,1.0); }")
         val fragmentShader = compileShader(GLES30.GL_FRAGMENT_SHADER,
-            "#version 300 es\nprecision mediump float;\nin vec3 vColor;\nout vec4 outColor;\nvoid main(){ outColor=vec4(vColor,1.0); }")
+            "#version 300 es\nprecision highp float;\nin vec3 vColor;\nin vec3 vWorldPosition;\nout vec4 outColor;\nvoid main(){ vec3 N=normalize(cross(dFdx(vWorldPosition),dFdy(vWorldPosition))); if(!gl_FrontFacing) N=-N; vec3 L=normalize(vec3(-0.45,0.75,0.55)); vec3 V=normalize(vec3(0.0,0.0,3.0)-vWorldPosition); vec3 H=normalize(L+V); float diffuse=max(dot(N,L),0.0); float specular=pow(max(dot(N,H),0.0),48.0)*0.32; float rim=pow(1.0-max(dot(N,V),0.0),3.0)*0.10; vec3 linearColor=vColor*(0.16+diffuse*0.92)+vec3(specular+rim); vec3 mapped=linearColor/(linearColor+vec3(0.65)); mapped=pow(mapped,vec3(1.0/2.2)); outColor=vec4(mapped,1.0); }")
         program = GLES30.glCreateProgram()
         GLES30.glAttachShader(program, vertexShader)
         GLES30.glAttachShader(program, fragmentShader)
@@ -103,6 +104,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
         GLES30.glDeleteShader(vertexShader)
         GLES30.glDeleteShader(fragmentShader)
         mvpLocation = GLES30.glGetUniformLocation(program, "uMvp")
+        modelLocation = GLES30.glGetUniformLocation(program, "uModel")
 
         val vertexData: FloatBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
             .order(ByteOrder.nativeOrder()).asFloatBuffer().apply { put(vertices); position(0) }
@@ -146,6 +148,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
 
         GLES30.glUseProgram(program)
         GLES30.glUniformMatrix4fv(mvpLocation, 1, false, mvp, 0)
+        GLES30.glUniformMatrix4fv(modelLocation, 1, false, model, 0)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vertexBufferId)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, indexBufferId)
         val stride = 6 * 4
