@@ -70,6 +70,14 @@ class EngineRenderer : GLSurfaceView.Renderer {
         20, 21, 22, 20, 22, 23
     )
 
+    // The renderer consumes the validated CPU mesh; GPU buffers are created only
+    // on the GL thread in onSurfaceCreated().
+    private val mesh = EngineMesh(
+        positions = FloatArray(vertices.size / 2) { i -> vertices[(i / 3) * 6 + (i % 3)] },
+        colors = FloatArray(vertices.size / 2) { i -> vertices[(i / 3) * 6 + 3 + (i % 3)] },
+        indices = IntArray(indices.size) { i -> indices[i].toInt() and 0xffff }
+    )
+
     private val projection = FloatArray(16)
     private val view = FloatArray(16)
     private val model = FloatArray(16)
@@ -106,19 +114,29 @@ class EngineRenderer : GLSurfaceView.Renderer {
         mvpLocation = GLES30.glGetUniformLocation(program, "uMvp")
         modelLocation = GLES30.glGetUniformLocation(program, "uModel")
 
-        val vertexData: FloatBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
-            .order(ByteOrder.nativeOrder()).asFloatBuffer().apply { put(vertices); position(0) }
-        val indexData: ShortBuffer = ByteBuffer.allocateDirect(indices.size * 2)
-            .order(ByteOrder.nativeOrder()).asShortBuffer().apply { put(indices); position(0) }
+        val meshPositions = mesh.positions
+        val meshColors = mesh.colors
+        val interleavedVertices = FloatArray(mesh.vertexCount * 6) { i ->
+            val vertex = i / 6
+            val component = i % 6
+            if (component < 3) meshPositions[vertex * 3 + component]
+            else meshColors[vertex * 3 + component - 3]
+        }
+        val meshIndices = mesh.indices
+        val gpuIndices = ShortArray(meshIndices.size) { i -> meshIndices[i].toShort() }
+        val vertexData: FloatBuffer = ByteBuffer.allocateDirect(interleavedVertices.size * 4)
+            .order(ByteOrder.nativeOrder()).asFloatBuffer().apply { put(interleavedVertices); position(0) }
+        val indexData: ShortBuffer = ByteBuffer.allocateDirect(gpuIndices.size * 2)
+            .order(ByteOrder.nativeOrder()).asShortBuffer().apply { put(gpuIndices); position(0) }
 
         val buffers = IntArray(2)
         GLES30.glGenBuffers(2, buffers, 0)
         vertexBufferId = buffers[0]
         indexBufferId = buffers[1]
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vertexBufferId)
-        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, vertices.size * 4, vertexData, GLES30.GL_STATIC_DRAW)
+        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, interleavedVertices.size * 4, vertexData, GLES30.GL_STATIC_DRAW)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, indexBufferId)
-        GLES30.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, indices.size * 2, indexData, GLES30.GL_STATIC_DRAW)
+        GLES30.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, gpuIndices.size * 2, indexData, GLES30.GL_STATIC_DRAW)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, 0)
     }
@@ -156,7 +174,7 @@ class EngineRenderer : GLSurfaceView.Renderer {
         GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, stride, 0)
         GLES30.glEnableVertexAttribArray(1)
         GLES30.glVertexAttribPointer(1, 3, GLES30.GL_FLOAT, false, stride, 3 * 4)
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, indices.size, GLES30.GL_UNSIGNED_SHORT, 0)
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, meshIndices.size, GLES30.GL_UNSIGNED_SHORT, 0)
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0)
