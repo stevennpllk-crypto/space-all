@@ -1,5 +1,6 @@
 name: JASSIM ENGINE Android build and visual test
 on:
+  workflow_dispatch:
   push:
     branches: ["engine/**"]
     paths:
